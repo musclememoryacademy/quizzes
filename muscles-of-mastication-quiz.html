@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muscles of Mastication Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #0a0f1e;
+    color: #e8e0d0;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* Header */
+  .header {
+    background: #002244;
+    border-bottom: 3px solid #FFD700;
+    padding: 1.5rem 2rem;
+    text-align: center;
+  }
+  .header-skull {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+  }
+  .header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FFD700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+  .header p {
+    font-size: 0.8rem;
+    color: #a0b4cc;
+    font-style: italic;
+  }
+
+  /* Main */
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Progress */
+  .progress-bar {
+    background: #1a2a3a;
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #FFD700;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 0.75rem;
+    color: #6a84a0;
+    text-align: right;
+    margin-top: -1.4rem;
+    margin-bottom: 1.6rem;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Question card */
+  .question-card {
+    background: #0e1826;
+    border: 1px solid #1e3050;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .question-tag {
+    font-size: 0.7rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFD700;
+    margin-bottom: 0.75rem;
+  }
+  .question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e8e0d0;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option {
+    background: #0a1420;
+    border: 1px solid #1e3050;
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #c8d8e8;
+    text-align: left;
+    width: 100%;
+    font-family: Georgia, serif;
+  }
+  .option:hover:not(.disabled) {
+    border-color: #FFD700;
+    background: #111e2e;
+  }
+  .option.selected { border-color: #FFD700; background: #1a2800; }
+  .option.correct  { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong    { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1e3050;
+    font-size: 0.75rem;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    color: #6a84a0;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .option.correct  .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong    .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter {
+    background: #FFD700; color: #002244;
+  }
+
+  /* Explanation */
+  .explanation {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    background: #0a1c10;
+    border-left: 3px solid #4caf50;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #a8d8a8;
+    font-family: Arial, sans-serif;
+  }
+  .explanation.wrong-exp {
+    background: #1c0a0a;
+    border-left-color: #e53935;
+    color: #e8a0a0;
+  }
+  .explanation strong {
+    font-family: Georgia, serif;
+    font-weight: normal;
+    color: #FFD700;
+  }
+
+  /* Nav buttons */
+  .nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+  .btn {
+    background: #002244;
+    border: 1px solid #FFD700;
+    color: #FFD700;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary {
+    background: #FFD700;
+    color: #002244;
+    font-weight: 700;
+  }
+  .btn-primary:hover { background: #ffe033; }
+
+  /* Results */
+  .results {
+    display: none;
+    text-align: center;
+    padding: 2rem 0;
+  }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 {
+    font-size: 1.5rem;
+    color: #FFD700;
+    margin-bottom: 0.5rem;
+  }
+  .score-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #FFD700;
+    margin: 1rem 0;
+  }
+  .score-label {
+    font-size: 0.9rem;
+    color: #6a84a0;
+    font-family: Arial, sans-serif;
+    margin-bottom: 1.5rem;
+  }
+  .score-msg {
+    font-size: 1rem;
+    color: #c8d8e8;
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    font-family: Arial, sans-serif;
+  }
+  .result-breakdown {
+    background: #0e1826;
+    border: 1px solid #1e3050;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+  }
+  .result-breakdown h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFD700;
+    font-family: Arial, sans-serif;
+    margin-bottom: 1rem;
+  }
+  .result-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #1e3050;
+    font-size: 0.85rem;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .mnemonic-reminder {
+    background: #002244;
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .mnemonic-reminder p {
+    font-size: 1.15rem;
+    color: #FFD700;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+  }
+  .mnemonic-reminder small {
+    font-size: 0.78rem;
+    color: #a0b4cc;
+    font-family: Arial, sans-serif;
+    display: block;
+  }
+
+  .footer-note {
+    font-size: 0.78rem;
+    color: #3a5060;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #1e3050;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Muscles of Mastication — Retrieval Quiz</p>
+</div>
+
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-tag" id="question-tag">Key fact</div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-section">
+    <div class="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+
+    <div class="mnemonic-reminder">
+      <p>MEDitation Might Lower TEMPers</p>
+      <small>MEDial pterygoid · Masseter · Lateral pterygoid · TEMPoralis · All → V3</small>
+    </div>
+
+    <div class="result-breakdown" id="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">
+      Retake quiz
+    </button>
+  </div>
+
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    tag: "Master mnemonic",
+    q: "What does the word <em>Might</em> represent in the mnemonic MEDitation Might Lower TEMPers — and why was that specific word chosen?",
+    options: [
+      "The masseter, because it is the largest muscle of mastication by volume",
+      "The masseter, because it generates the highest bite force relative to its size of any muscle in the body",
+      "The medial pterygoid, because it works with the masseter to form the pterygomasseteric sling",
+      "The temporalis, because its posterior fibres produce the strongest retraction force"
+    ],
+    correct: 1,
+    exp: "<strong>Might = Masseter.</strong> The connection is factual, not arbitrary. The masseter IS the mightiest muscle for its size anywhere in the human body. That fact is embedded in the mnemonic word itself — which is why this mnemonic meets the channel standard. Every word earns its place."
+  },
+  {
+    tag: "Nerve supply",
+    q: "What is the nerve supply of all four muscles of mastication?",
+    options: [
+      "V1 — the ophthalmic division of the trigeminal nerve (CN V)",
+      "V2 — the maxillary division of the trigeminal nerve (CN V)",
+      "V3 — the mandibular division of the trigeminal nerve (CN V)",
+      "CN VII — the facial nerve, which controls all muscles of the jaw"
+    ],
+    correct: 2,
+    exp: "<strong>V3 — the mandibular nerve.</strong> All four muscles of mastication. No exceptions. The masseteric nerve, deep temporal nerves, medial pterygoid nerve, and lateral pterygoid nerve are all branches of V3. Learn the muscle names and you get the nerve names for free — they follow the same naming pattern."
+  },
+  {
+    tag: "Lateral pterygoid",
+    q: "The lateral pterygoid is the only muscle of mastication that lowers the jaw. What is the second unique anatomical feature that makes it unlike any other muscle in the entire human body?",
+    options: [
+      "It is the only muscle of mastication with two distinct heads",
+      "It is the only muscle of the four that cannot be directly palpated through the skin",
+      "It is the only muscle in the entire human body that inserts into a joint disc",
+      "It is the only muscle of mastication innervated by a branch that runs medially"
+    ],
+    correct: 2,
+    exp: "<strong>The lateral pterygoid inserts into the articular disc of the TMJ.</strong> Its superior head attaches to the disc and capsule. This makes it the only muscle anywhere in the human body with this arrangement — not just the only muscle of mastication. The inferior head inserts into the pterygoid fovea on the condylar neck."
+  },
+  {
+    tag: "Temporalis",
+    q: "What structure does the temporalis insert into — and how do you distinguish it from the nearby structure it does NOT insert into?",
+    options: [
+      "The condylar process — distinguished from the coronoid by its rounded shape at the back of the ramus",
+      "The coronoid process — COROnoid = CROWNoid, the pointed projection at the FRONT of the ramus",
+      "The ramus body directly — it has no specific process insertion",
+      "The pterygoid fovea on the anterior condylar neck — same as the lateral pterygoid inferior head"
+    ],
+    correct: 1,
+    exp: "<strong>Coronoid process — COROnoid = CROWNoid.</strong> Two projections sit at the top of the ramus: the coronoid (front, pointed) and the condylar process (back, rounded, forms the actual TMJ joint). Temporalis goes to the CORONOID. The mnemonic: the temporalis comes DOWN from the TOP of the skull and pulls the CROWN of the ramus UPWARD. Crown, coronoid, top, up."
+  },
+  {
+    tag: "Masseter heads",
+    q: "The masseter has two heads with different origins. Which of these correctly identifies both — and the mnemonic for keeping them straight?",
+    options: [
+      "Superficial head from the medial surface of the arch (BACK/INSIDE); deep head from the anterior two thirds (FRONT) — deep equals seen",
+      "Superficial head from the anterior two thirds of the zygomatic arch (FRONT); deep head from the posterior one third and medial surface (BACK/INSIDE) — superficial equals seen",
+      "Both heads originate from the entire length of the zygomatic arch, but the superficial head is more lateral and the deep head more medial",
+      "Superficial head from the body of the zygomatic bone; deep head from the temporal process of the zygomatic bone"
+    ],
+    correct: 1,
+    exp: "<strong>Superficial = SEEN = FRONT (anterior 2/3 of arch). Deep = HIDDEN = BACK (posterior 1/3 + medial surface).</strong> The mnemonic: superficial means visible and accessible — it comes from the front. Deep means hidden and posterior — it comes from the back and inside. Direction matches position, every time."
+  },
+  {
+    tag: "Temporalis actions",
+    q: "The temporalis has a precise division of labour between its fibre groups. Which statement correctly pairs fibre direction with jaw action?",
+    options: [
+      "Anterior fibres (horizontal) produce retraction; posterior fibres (vertical) produce elevation",
+      "Anterior fibres (vertical) produce elevation; posterior fibres (horizontal) produce retraction",
+      "All fibres produce elevation only — retraction is the role of the masseter deep head",
+      "Anterior fibres produce protrusion; posterior fibres produce retraction"
+    ],
+    correct: 1,
+    exp: "<strong>Fibre direction = pull direction.</strong> Anterior fibres run VERTICALLY → produce ELEVATION (mouth closes). Posterior fibres run HORIZONTALLY → produce RETRACTION (jaw goes back). This is also what makes the temporalis unique — it is the PRIMARY retractor among the four muscles. No other muscle of mastication has retraction as a primary action."
+  },
+  {
+    tag: "Pterygomasseteric sling",
+    q: "What is the pterygomasseteric sling, and which two muscles form it?",
+    options: [
+      "A fascial band connecting the masseter to the temporalis, forming the primary closing mechanism of the jaw",
+      "A muscular hammock around the angle of the mandible formed by the masseter (lateral surface) and the medial pterygoid (medial surface)",
+      "A ligament connecting the lateral pterygoid to the articular disc, stabilising the TMJ during protrusion",
+      "The combined action of all four muscles of mastication working together to produce maximum bite force"
+    ],
+    correct: 1,
+    exp: "<strong>Masseter (outside) + medial pterygoid (inside) = muscular hammock around the angle of the mandible.</strong> The masseter grips the lateral surface; the medial pterygoid grips the medial surface. Same level, same angle, opposite sides. Together they are the primary closing and stabilising force of the jaw. Two muscles, one hammock."
+  },
+  {
+    tag: "Medial pterygoid",
+    q: "Where does the medial pterygoid insert — and what is the mnemonic that makes this impossible to forget?",
+    options: [
+      "Into the lateral surface of the ramus and angle of the mandible — the name is misleading",
+      "Into the coronoid process of the mandible — it shares this insertion with the temporalis",
+      "Into the medial surface of the ramus and angle of the mandible — the name IS the insertion",
+      "Into the pterygoid fovea on the condylar neck — same as the lateral pterygoid inferior head"
+    ],
+    correct: 2,
+    exp: "<strong>MEDIAL surface of the ramus and angle. Name equals insertion.</strong> MEDIAL pterygoid inserts on the MEDIAL surface. The muscle name tells you the answer. If asked where the medial pterygoid inserts in an exam — the word 'medial' in the question IS the answer."
+  },
+  {
+    tag: "Lateral pterygoid — clinical",
+    q: "A client presents with clicking and intermittent locking of the jaw on opening. Which anatomical structure is most directly responsible for this presentation, and what is the mechanism?",
+    options: [
+      "The masseter, which has gone into spasm and is preventing full depression of the mandible",
+      "The superior head of the lateral pterygoid, which in spasm pulls the articular disc anteriorly causing anterior disc displacement",
+      "The posterior fibres of the temporalis, which are retracting the condyle into the disc causing impingement",
+      "The medial pterygoid, which requires intraoral assessment and is most likely the source of TMJ dysfunction"
+    ],
+    correct: 1,
+    exp: "<strong>Superior head of the lateral pterygoid → anterior disc displacement.</strong> The superior head inserts into the articular disc. When it goes into spasm, it draws the disc anteriorly out of its normal position between the condyle and the articular eminence. The condyle then clicks as it moves over the displaced disc edge on opening. This is the mechanical basis of the most common form of internal derangement of the TMJ."
+  },
+  {
+    tag: "Lateral pterygoid actions",
+    q: "The right lateral pterygoid contracts on its own. What happens to the mandible?",
+    options: [
+      "The jaw opens bilaterally — depression and protrusion occur symmetrically",
+      "The right condyle retracts, pulling the chin to the right",
+      "The right condyle is drawn forward, and the chin deviates to the LEFT",
+      "The jaw closes on the right side only, producing right-sided bite force"
+    ],
+    correct: 2,
+    exp: "<strong>Right lateral pterygoid fires → chin goes LEFT.</strong> The revolving door mnemonic: push on the RIGHT side of a revolving door — the left side swings toward you. The unilateral lateral pterygoid pulls its OWN condyle forward, which pivots the chin AWAY from it to the opposite side. Left fires → chin goes right. Right fires → chin goes left."
+  },
+  {
+    tag: "Pterygoid plate wall",
+    q: "The medial and lateral pterygoid muscles both originate in relation to the lateral pterygoid plate. What is the key spatial relationship — and the mnemonic for it?",
+    options: [
+      "Both muscles originate from the medial surface of the lateral pterygoid plate — they share the same surface",
+      "The lateral pterygoid plate is a wall with two sides: the medial pterygoid on the INSIDE (medial surface), the lateral pterygoid on the OUTSIDE (lateral surface)",
+      "The medial pterygoid originates from the lateral surface; the lateral pterygoid originates from the medial surface — they cross over",
+      "The lateral pterygoid originates from the greater wing of the sphenoid only — it has no relationship to the pterygoid plate"
+    ],
+    correct: 1,
+    exp: "<strong>Same wall, opposite sides.</strong> The lateral pterygoid plate is a WALL. Medial pterygoid = medial (inside) surface. Lateral pterygoid inferior head = lateral (outside) surface. Two muscles sharing one wall — one inside, one outside. Note: the lateral pterygoid superior head originates from the greater wing of the sphenoid, not the plate."
+  },
+  {
+    tag: "Clinical access",
+    q: "In clinical manual therapy, which muscle of mastication is unique in that it CANNOT be effectively assessed or treated through the skin, requiring intraoral technique?",
+    options: [
+      "The masseter — its deep head is inaccessible without intraoral access",
+      "The lateral pterygoid — it cannot be directly palpated at all",
+      "The medial pterygoid — it can only be accessed with intraoral technique",
+      "The temporalis — its deep fibres are beneath the temporal fascia and inaccessible externally"
+    ],
+    correct: 2,
+    exp: "<strong>The medial pterygoid requires intraoral technique.</strong> Its location medial to the mandibular ramus puts it out of reach through the skin. The masseter, temporalis, and temporal fossa are all palpable externally. The lateral pterygoid is not directly palpable at all — but the medial pterygoid is the one that specifically requires you to go inside the mouth for any manual therapy assessment or treatment."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent =
+    `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width =
+    `${((current + 1) / questions.length) * 100}%`;
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) {
+        btn.classList.remove('reveal-correct');
+        btn.classList.add('correct');
+      }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    const correct = answers[current] === q.correct;
+    exp.className = 'explanation' + (correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else {
+    exp.style.display = 'none';
+    exp.textContent = '';
+  }
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) {
+    nextBtn.textContent = answered[current] ? 'See results →' : 'Next →';
+    nextBtn.disabled = !answered[current];
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = !answered[current];
+  }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) {
+      btn.classList.remove('reveal-correct');
+      btn.classList.add('correct');
+    }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) {
+    nextBtn.textContent = 'See results →';
+  }
+}
+
+function nextQ() {
+  if (current === questions.length - 1) {
+    showResults(); return;
+  }
+  current++;
+  renderQuestion();
+}
+
+function prevQ() {
+  if (current === 0) return;
+  current--;
+  renderQuestion();
+}
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  const res = document.getElementById('results-section');
+  res.style.display = 'block';
+
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+
+  let msg, skull;
+  if (pct === 100) {
+    msg = "Perfect score. Max would note this is an expected outcome given adequate preparation. Antony would lose his mind with excitement. Both responses are correct.";
+    skull = "💀🏆";
+  } else if (pct >= 75) {
+    msg = "Strong result. The muscles of mastication are now in your long-term memory — the retrieval practice you just did will make them stick. Review any missed questions and retake to reach 100%.";
+    skull = "💀✓";
+  } else if (pct >= 50) {
+    msg = "Good foundation. Re-watch the sections for the questions you missed, then retake. Each retrieval attempt strengthens the memory trace — especially when you correct an error.";
+    skull = "💀";
+  } else {
+    msg = "Go back and re-watch the full video, then retake this quiz immediately. The act of answering questions — even incorrectly — primes your brain to retain the correct answers on the next attempt.";
+    skull = "💀";
+  }
+
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `
+      <div class="result-icon">${correct ? '✓' : '✗'}</div>
+      <div>
+        <div class="result-q">${shortQ}</div>
+        <div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div>
+      </div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
