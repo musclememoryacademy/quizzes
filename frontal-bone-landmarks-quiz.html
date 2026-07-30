@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frontal Bone Landmarks Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #0a0f1e;
+    color: #e8e0d0;
+    min-height: 100vh;
+  }
+  .header {
+    background: #002244;
+    border-bottom: 3px solid #FFD700;
+    padding: 1.5rem 2rem;
+    text-align: center;
+  }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #FFD700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar {
+    background: #1a2a3a;
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #FFD700;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 0.75rem;
+    color: #6a84a0;
+    text-align: right;
+    margin-top: -1.4rem;
+    margin-bottom: 1.6rem;
+    font-family: Arial, sans-serif;
+  }
+  .question-card {
+    background: #0e1826;
+    border: 1px solid #1e3050;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  .question-tag {
+    font-size: 0.7rem;
+    font-family: Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFD700;
+    margin-bottom: 0.75rem;
+  }
+  .question-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e8e0d0;
+    margin-bottom: 1.5rem;
+  }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option {
+    background: #0a1420;
+    border: 1px solid #1e3050;
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: border-color 0.15s, background 0.15s;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #c8d8e8;
+    text-align: left;
+    width: 100%;
+    font-family: Georgia, serif;
+  }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct  { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong    { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #1e3050;
+    font-size: 0.75rem;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    color: #6a84a0;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .option.correct  .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong    .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    background: #0a1c10;
+    border-left: 3px solid #4caf50;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #a8d8a8;
+    font-family: Arial, sans-serif;
+  }
+  .explanation.wrong-exp {
+    background: #1c0a0a;
+    border-left-color: #e53935;
+    color: #e8a0a0;
+  }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+  .btn {
+    background: #002244;
+    border: 1px solid #FFD700;
+    color: #FFD700;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.03em;
+  }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg {
+    font-size: 1rem;
+    color: #c8d8e8;
+    line-height: 1.7;
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    font-family: Arial, sans-serif;
+  }
+  .result-breakdown {
+    background: #0e1826;
+    border: 1px solid #1e3050;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: left;
+  }
+  .result-breakdown h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFD700;
+    font-family: Arial, sans-serif;
+    margin-bottom: 1rem;
+  }
+  .result-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #1e3050;
+    font-size: 0.85rem;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .mnemonic-reminder {
+    background: #002244;
+    border: 2px solid #FFD700;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .mnemonic-reminder p { font-size: 1rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .mnemonic-reminder ul {
+    list-style: none;
+    font-size: 0.78rem;
+    color: #a0b4cc;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+  }
+  .footer-note {
+    font-size: 0.78rem;
+    color: #3a5060;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #1e3050;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Frontal Bone Landmarks — Retrieval Quiz</p>
+</div>
+
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+
+    <div class="mnemonic-reminder">
+      <p>Seven mnemonics to keep</p>
+      <ul>
+        <li>Vertical = visible (squamous)</li>
+        <li>Horizontal = hidden (orbital)</li>
+        <li>Glabella = Italian pasta</li>
+        <li>Frontal crest = curtain rod</li>
+        <li>Supraorbital foramen → V1 ophthalmic</li>
+        <li>Ethmoidal notch = name equals neighbour</li>
+        <li>Tears live in the corner (lacrimal fossa)</li>
+        <li>Frontal sinuses drain DOWN via frontonasal duct</li>
+      </ul>
+    </div>
+
+    <div class="result-breakdown" id="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">
+      Retake quiz
+    </button>
+  </div>
+
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    tag: "Orientation mnemonic",
+    q: "The frontal bone has two principal parts. What is the mnemonic that keeps them straight — and which part does each word apply to?",
+    options: [
+      "Vertical = hidden (squamous part, inside the skull); Horizontal = visible (orbital part, forms the forehead)",
+      "Vertical = visible (squamous part, your forehead); Horizontal = hidden (orbital part, roof of eye socket)",
+      "Vertical = orbital (projects backward); Horizontal = squamous (faces forward)",
+      "The two parts are not distinguished by orientation — both project in the same direction"
+    ],
+    correct: 1,
+    exp: "<strong>Vertical = visible (squamous). Horizontal = hidden (orbital).</strong> The squamous part is the large vertical plate that forms your forehead — you can see it. The orbital part is the pair of horizontal plates that form the roofs of the eye sockets — hidden from view inside the orbit. The mnemonic maps orientation to visibility."
+  },
+  {
+    tag: "The glabella",
+    q: "Where is the glabella, and what is the mnemonic that makes it impossible to forget?",
+    options: [
+      "The glabella is the supraorbital margin — the bony ridge above the eye socket. It sounds like 'grab-ella' which helps you remember you can grab it with your fingers.",
+      "The glabella is the smooth midline area between the superciliary arches. Gla-BELL-ah sounds like a fancy Italian pasta — press between your eyebrows right now.",
+      "The glabella is the frontal crest on the internal surface. It is the midline anchor point for the falx cerebri.",
+      "The glabella is another name for the frontal sinus — the air space above the nasal bridge."
+    ],
+    correct: 1,
+    exp: "<strong>Smooth midline area between the superciliary arches. Gla-BELL-ah = Italian pasta.</strong> Press between your eyebrows right now. That is your glabella. The pasta mnemonic works because it is specific, memorable, and the sound is genuinely similar. Clinical note: the glabellar tap reflex (Myerson's sign) tests frontal lobe and basal ganglia function — failure to habituate suggests Parkinson's disease."
+  },
+  {
+    tag: "Frontal crest",
+    q: "The frontal crest is a ridge on the internal surface of the squamous part. What does it anchor — and what is the mnemonic?",
+    options: [
+      "It anchors the tentorium cerebelli — the horizontal fold dividing the cerebral and cerebellar compartments. The mnemonic is: the crest is a tent pole.",
+      "It anchors the falx cerebri — the dural fold separating the two cerebral hemispheres. The mnemonic is: the crest holds the curtain.",
+      "It anchors the superior sagittal sinus directly — the crest is the groove through which blood drains.",
+      "It anchors the arachnoid granulations — the crest holds the filter."
+    ],
+    correct: 1,
+    exp: "<strong>The frontal crest anchors the falx cerebri. The crest holds the curtain.</strong> The falx cerebri is the dural fold (the 'curtain') that runs in the midline between the two cerebral hemispheres. The frontal crest is the internal midline ridge off which this dural fold hangs. Picture a curtain rod running down the inside of your forehead."
+  },
+  {
+    tag: "Supraorbital foramen — location",
+    q: "The supraorbital foramen sits on the supraorbital margin. Where exactly — and why does this appear on almost every exam?",
+    options: [
+      "At the lateral end of the supraorbital margin, where it meets the zygomatic bone — approximately one-third from the lateral end",
+      "At the exact midpoint of the supraorbital margin — equidistant from both ends",
+      "At the junction of the medial third and lateral two-thirds of the supraorbital margin — approximately one-third from the medial end",
+      "At the medial end of the supraorbital margin, adjacent to the nasion"
+    ],
+    correct: 2,
+    exp: "<strong>Medial third / lateral two-thirds junction — approximately one-third from the medial end.</strong> This exact location is tested constantly in OSCE and written examinations. Find it on your own face — run your finger along your supraorbital margin from the inside corner outward and feel for the slight notch or foramen. It is palpable on yourself."
+  },
+  {
+    tag: "Supraorbital foramen — contents",
+    q: "The supraorbital foramen transmits which nerve — and what is the mnemonic connection that makes the nerve supply obvious from the name alone?",
+    options: [
+      "The supraorbital nerve, a branch of V2 (maxillary division). The foramen sits above the maxillary sinus, and V2 supplies the maxillary region.",
+      "The supraorbital nerve, a branch of V1 (ophthalmic division). Ophthalmic means EYE — the foramen sits ABOVE the EYE SOCKET. The name tells you everything.",
+      "The supraorbital nerve, a branch of the facial nerve (CN VII). The facial nerve supplies all structures above the orbit.",
+      "The infraorbital nerve, a branch of V2. Despite the name, the supraorbital foramen transmits the infraorbital nerve upward."
+    ],
+    correct: 1,
+    exp: "<strong>Supraorbital nerve — V1 ophthalmic division of the trigeminal nerve (CN V).</strong> The mnemonic: SUPRA = ABOVE. ORBITAL = EYE SOCKET. Ophthalmic means EYE. The nerve named for the EYE exits ABOVE the EYE SOCKET. The name tells you the division. Also transmits the supraorbital artery and vein. Clinical note: direct pressure over the foramen elicits significant pain — used as a pain stimulus in consciousness assessment."
+  },
+  {
+    tag: "Superciliary arches",
+    q: "The superciliary arches are the bony ridges above the orbital openings. What overlies them externally — and what important anatomical structure lies deep to them internally?",
+    options: [
+      "The eyebrows overlie them externally; the lacrimal glands lie deep to them internally",
+      "The eyebrows overlie them externally; the frontal sinuses lie deep to them internally",
+      "The skin of the forehead overlies them with no specific surface landmark; the frontal cortex lies deep",
+      "The temporal muscles overlie them externally; the dural venous sinuses lie deep"
+    ],
+    correct: 1,
+    exp: "<strong>Eyebrows externally; frontal sinuses internally.</strong> The superciliary arches are your brow ridges. SUPERciliary — super CILIA — your eyebrows (cilia = hairs) sit right over these ridges. Internally, the frontal sinuses occupy the diploë (the cancellous bone) just deep to and above the arches. This is why sinusitis causes forehead pain and tenderness across the brow ridge region."
+  },
+  {
+    tag: "Ethmoidal notch",
+    q: "The ethmoidal notch is a gap between the two orbital plates of the frontal bone. What fills this gap in the articulated skull — and what is the mnemonic?",
+    options: [
+      "The perpendicular plate of the ethmoid bone fills the ethmoidal notch. Name equals neighbour.",
+      "The cribriform plate of the ethmoid bone fills the ethmoidal notch. Name equals neighbour.",
+      "The vomer fills the ethmoidal notch, connecting the frontal bone to the nasal septum below.",
+      "The sphenoid bone fills the ethmoidal notch via its lesser wings projecting anteriorly."
+    ],
+    correct: 1,
+    exp: "<strong>The cribriform plate of the ethmoid fills the ethmoidal notch. Name equals neighbour.</strong> The notch is named for the bone that plugs it — the ETHMOIDAL notch is filled by the ETHMOID. Could not be simpler. The cribriform plate specifically (not the perpendicular plate) occupies this rectangular midline gap between the two orbital plates."
+  },
+  {
+    tag: "Orbital plates",
+    q: "The orbital plates of the frontal bone form the roofs of the orbits. What additional structure do they also form — and on which surface of each plate does the lacrimal gland fossa sit?",
+    options: [
+      "They form the floor of the middle cranial fossa. The lacrimal gland fossa sits on the medial surface of each plate.",
+      "They form the floor of the anterior cranial fossa. The lacrimal gland fossa sits on the anterolateral surface of each plate.",
+      "They form the floor of the posterior cranial fossa. The lacrimal gland fossa sits on the posterolateral surface.",
+      "They form part of the medial wall of the orbit. The lacrimal gland fossa sits on the inferior medial surface."
+    ],
+    correct: 1,
+    exp: "<strong>Floor of the anterior cranial fossa. Lacrimal gland fossa = anterolateral corner of each orbital plate.</strong> The orbital plates serve two anatomical roles simultaneously: roofs of the orbits below, and floors of the anterior cranial fossa above. The lacrimal gland fossa is the small depression in the anterolateral corner — LACRI = tears — where the tear gland lives. Tears live in the corner."
+  },
+  {
+    tag: "Lacrimal gland fossa",
+    q: "Where exactly is the lacrimal gland fossa — and what is the mnemonic that fixes its location?",
+    options: [
+      "Posteromedial corner of each orbital plate — where the orbital plate meets the ethmoid bone. Tears drain posteriorly and medially.",
+      "Anterolateral corner of each orbital plate — one on each side. Tears live in the corner.",
+      "On the external surface of the frontal bone, just lateral to the supraorbital margin.",
+      "In the ethmoidal notch — shared by both orbital plates in the midline."
+    ],
+    correct: 1,
+    exp: "<strong>Anterolateral corner of each orbital plate. Tears live in the corner.</strong> The lacrimal gland (LACRI = tears) lives in the front outer corner of the orbit roof — one on each side. Small, shallow depression, anterolateral position. The mnemonic: tears live in the corner of the orbital plate, and so does the lacrimal gland fossa."
+  },
+  {
+    tag: "Frontal sinuses",
+    q: "The frontal sinuses are paired air spaces within the frontal bone. Where do they drain — and what is the mnemonic for their drainage direction?",
+    options: [
+      "They drain superiorly via the frontonasal duct into the superior nasal meatus. Sinuses drain UP.",
+      "They drain laterally via the nasolacrimal duct into the inferior nasal meatus. Sinuses drain OUT.",
+      "They drain inferiorly via the frontonasal duct into the middle nasal meatus. They drain DOWN — water flows from forehead to nose.",
+      "They drain posteriorly via the ethmoid air cells into the posterior nasal cavity. Sinuses drain BACK."
+    ],
+    correct: 2,
+    exp: "<strong>Drain inferiorly via the frontonasal duct into the middle nasal meatus. They drain DOWN.</strong> Like water through a pipe from the forehead to the nose. This direction matters clinically — when inflamed, mucus pools in the sinus because drainage is against gravity when lying flat, which is why frontal sinusitis is worse lying down. Percussion tenderness over the anterior frontal bone above the supraorbital margins indicates frontal sinusitis."
+  },
+  {
+    tag: "Glabellar tap — clinical",
+    q: "What is the glabellar tap reflex (Myerson's sign) — and what does a positive result indicate?",
+    options: [
+      "Tapping the glabella once produces a blink reflex. A positive result (absent blink) indicates CN VII palsy.",
+      "Tapping the glabella repeatedly — a normal response is continued blinking that does not habituate. A positive result (habituation stops blinking) indicates intact frontal lobe function.",
+      "Tapping the glabella repeatedly — a normal response is habituation (blinking stops). A positive result (continued blinking that does not habituate) suggests Parkinson's disease or frontal lobe pathology.",
+      "Tapping the glabella produces a corneal reflex via CN V. A positive result indicates trigeminal nerve damage."
+    ],
+    correct: 2,
+    exp: "<strong>Repeated tapping — normal = habituation (blinking stops). Positive Myerson's sign = continued blinking = Parkinson's disease or frontal lobe pathology.</strong> The frontal lobe normally suppresses the blink response after a few taps — this is habituation. Loss of this suppression (the blink continues with every tap) indicates basal ganglia dysfunction or frontal lobe pathology. One of the few clinical tests that directly involves the glabella."
+  },
+  {
+    tag: "Articulations",
+    q: "The frontal bone articulates with how many other bones — and why is this number clinically and anatomically significant?",
+    options: [
+      "Six other bones — reflecting its position at the junction of the calvarium and facial skeleton",
+      "Eight other bones — it forms the keystone of the anterior cranium",
+      "Twelve other bones — reflecting its structural centrality to the anterior cranium and its role touching nearly every neighbouring bone",
+      "Four other bones — the parietal bones, the sphenoid, and the ethmoid only"
+    ],
+    correct: 2,
+    exp: "<strong>Twelve other bones.</strong> The frontal bone is the most popular bone at the cranial party. Twelve articulations reflects its position as a structural hub of the anterior cranium — it borders the parietal bones, sphenoid, ethmoid, nasal bones, lacrimal bones, maxillae, zygomatic bones, and more. This number is frequently cited in examination questions to emphasise the frontal bone's anatomical centrality."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent =
+    `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width =
+    `${((current + 1) / questions.length) * 100}%`;
+
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) {
+        btn.classList.remove('reveal-correct');
+        btn.classList.add('correct');
+      }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else {
+    exp.style.display = 'none';
+  }
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) {
+    nextBtn.textContent = answered[current] ? 'See results →' : 'Next →';
+    nextBtn.disabled = !answered[current];
+  } else {
+    nextBtn.textContent = 'Next →';
+    nextBtn.disabled = !answered[current];
+  }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) {
+      btn.classList.remove('reveal-correct');
+      btn.classList.add('correct');
+    }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() {
+  if (current === 0) return;
+  current--; renderQuestion();
+}
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+
+  let msg, skull;
+  if (pct === 100) {
+    msg = "Perfect score. Every landmark, every mnemonic, every clinical application — retained completely. Max would consider this the expected outcome. Antony would consider it cause for celebration.";
+    skull = "💀🏆";
+  } else if (pct >= 75) {
+    msg: "Strong result. The frontal bone landmarks are solidly in your long-term memory. Review any missed questions, find the corresponding section of the video, then retake to reach 100%.";
+    msg = "Strong result. The frontal bone landmarks are solidly in your long-term memory. Review any missed questions, find the corresponding section of the video, then retake to reach 100%.";
+    skull = "💀✓";
+  } else if (pct >= 50) {
+    msg = "Good foundation. Go back to the specific sections where you made errors, re-watch those moments, then retake immediately. The combination of re-watching and re-testing is significantly more effective than either alone.";
+    skull = "💀";
+  } else {
+    msg = "Re-watch the full video, paying close attention to the mnemonics for each landmark. Then retake this quiz. Each retrieval attempt — even incorrect ones — primes your brain to retain the correct answer next time.";
+    skull = "💀";
+  }
+
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `
+      <div class="result-icon">${correct ? '✓' : '✗'}</div>
+      <div>
+        <div class="result-q">${shortQ}</div>
+        <div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div>
+      </div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
