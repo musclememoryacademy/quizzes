@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotator Cuff Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; text-align: center; }
+  .mnemonic-reminder p { font-size: 1.1rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .mnemonic-reminder .cast { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.5rem; font-size: 0.78rem; color: #a0b4cc; font-family: Arial, sans-serif; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Rotator Cuff — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>SITS — The Full Cast</p>
+      <div class="cast">
+        <span>👑 Supraspinatus — ABDicated = ABDucts</span>
+        <span>🔄 Infraspinatus + Teres minor — EXTroverts = EXTernal rotation</span>
+        <span>🔀 Subscapularis — INTrovert = INTernal rotation, lesser tubercle</span>
+      </div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: C A D B C D A C B D A B (3×each A/B/C/D)
+const questions = [
+  {
+    tag: "Master mnemonic",
+    q: "What does SITS stand for — and what is true of all four muscles in the group?",
+    options: [
+      "Supraspinatus, Iliocostalis, Teres major, Subscapularis — all originate from the humerus",
+      "Supraspinatus, Infraspinatus, Trapezius, Subscapularis — all insert onto the scapula",
+      "Supraspinatus, Infraspinatus, Teres minor, Subscapularis — all originate from the scapula and insert onto the humerus",
+      "Supraspinatus, Infraspinatus, Teres minor, Serratus anterior — all innervated by the axillary nerve"
+    ],
+    correct: 2,
+    exp: "<strong>SITS: Supraspinatus, Infraspinatus, Teres minor, Subscapularis.</strong> All four originate from the scapula and insert onto the humerus. All four are innervated by branches of the brachial plexus. This is the through-line for the entire group."
+  },
+  {
+    tag: "The Spoiled Prince",
+    q: "The supraspinatus is nicknamed the Spoiled Prince because he ABDicated. What does this mnemonic encode — and what is his primary action?",
+    options: [
+      "ABDicated encodes ABDuction — supraspinatus initiates the first 15 degrees of arm abduction before the deltoid takes over",
+      "ABDicated encodes ADDuction — supraspinatus adducts the arm when the deltoid is fatigued",
+      "ABDicated encodes the fact that supraspinatus abandoned its rotational role and only stabilises the joint",
+      "ABDicated is a memory hook for the suBAcromiaL space — the space the muscle passes through"
+    ],
+    correct: 0,
+    exp: "<strong>ABDicated = ABDuction.</strong> The prince ABDicates — supraspinatus ABDucts. Specifically, it initiates the first 15 degrees of arm abduction before the deltoid becomes the dominant abductor. It also provides continuous stabilisation, holding the humeral head against the glenoid."
+  },
+  {
+    tag: "Supraspinatus — origin",
+    q: "The Spoiled Prince lives on top of the mountain. In anatomical terms, where does the supraspinatus originate?",
+    options: [
+      "The infraspinous fossa — the concave region inferior to the spine of the scapula",
+      "The subscapular fossa — the anterior surface of the scapula facing the ribcage",
+      "The lateral border of the scapula — the outer edge visible from behind",
+      "The supraspinous fossa — the concave region superior to the spine of the scapula"
+    ],
+    correct: 3,
+    exp: "<strong>Supraspinous fossa — ABOVE the spine of the scapula.</strong> SUPRA means above. The supraspinous fossa is the concave region on the posterior scapula that sits above (superior to) the spine of the scapula. The prince literally lives on top."
+  },
+  {
+    tag: "Supraspinatus — clinical",
+    q: "Why is the supraspinatus the most commonly torn rotator cuff muscle — and which clinical test specifically loads its tendon?",
+    options: [
+      "It is most commonly torn because it is the largest and most powerful — tested with the lift-off test",
+      "It is most commonly torn because its tendon passes through the narrow subacromial space under the acromion, which is prone to compression — tested with the empty can test",
+      "It is most commonly torn because it inserts onto the lesser tubercle, which is poorly supported — tested with the belly-press test",
+      "It is most commonly torn because the suprascapular nerve frequently gets compressed — tested with the external rotation lag sign"
+    ],
+    correct: 1,
+    exp: "<strong>Subacromial compression — empty can test.</strong> The supraspinatus tendon passes through the subacromial space beneath the acromion and coracoacromial ligament. This space narrows with age, overhead work, and impingement, compressing the tendon. The empty can test: arm at 90° abduction, internally rotated, resist downward force. Pain or weakness = supraspinatus."
+  },
+  {
+    tag: "The Extroverts",
+    q: "Infraspinatus and teres minor are the Extroverts. What shared action makes them a pair — and what clinical test assesses them together?",
+    options: [
+      "Both medially rotate the humerus — tested with the lift-off test",
+      "Both abduct the humerus — tested with the empty can test",
+      "Both laterally rotate the humerus — tested with the external rotation lag sign",
+      "Both extend the humerus — tested with the belly-press test"
+    ],
+    correct: 2,
+    exp: "<strong>EXTroverts = EXTernal (lateral) rotation — external rotation lag sign.</strong> Both infraspinatus and teres minor produce lateral rotation of the humerus. The external rotation lag sign: passively externally rotate the arm, release, watch for lag back to neutral. If the arm drops, infraspinatus and teres minor are failing together."
+  },
+  {
+    tag: "Extroverts — insertions",
+    q: "Both extroverts hang out at the Greater Tubercle. Which facets do they occupy — and how do you remember which muscle takes which spot?",
+    options: [
+      "Infraspinatus → inferior facet; Teres minor → middle facet. Smaller muscle gets the higher spot.",
+      "Both insert onto the superior facet. They share the same insertion point which is why they share the same action.",
+      "Infraspinatus → superior facet; Teres minor → middle facet. They sit above the prince's insertion.",
+      "Infraspinatus → middle facet; Teres minor → inferior facet. Bigger muscle gets the middle spot, smaller muscle gets the lower spot."
+    ],
+    correct: 3,
+    exp: "<strong>Infraspinatus → middle facet. Teres minor → inferior facet.</strong> Bigger muscle gets the middle spot. Smaller muscle gets the lower spot. The three facets of the greater tubercle in order from superior to inferior: supraspinatus (the prince, on top), infraspinatus (bigger extrovert, middle), teres minor (smaller extrovert, bottom)."
+  },
+  {
+    tag: "Extroverts — nerves",
+    q: "The two extroverts are innervated by different nerves. Which nerve supplies each one?",
+    options: [
+      "Infraspinatus: axillary nerve (C5, C6). Teres minor: suprascapular nerve (C5, C6).",
+      "Infraspinatus: suprascapular nerve (C5, C6). Teres minor: axillary nerve (C5, C6).",
+      "Both infraspinatus and teres minor: axillary nerve (C5, C6).",
+      "Both infraspinatus and teres minor: suprascapular nerve (C5, C6)."
+    ],
+    correct: 1,
+    exp: "<strong>Infraspinatus: suprascapular nerve (C5, C6). Teres minor: axillary nerve (C5, C6).</strong> The suprascapular nerve serves two rotator cuff muscles — supraspinatus AND infraspinatus. This means suprascapular nerve injury produces weakness of both abduction initiation and lateral rotation simultaneously. Teres minor shares the axillary nerve with the deltoid."
+  },
+  {
+    tag: "The Introvert",
+    q: "Subscapularis is the Introvert — hidden away from the group. What makes its location and insertion categorically different from the other three muscles?",
+    options: [
+      "It originates from the infraspinous fossa and inserts onto the superior facet of the greater tubercle — it is simply deeper than the others",
+      "It originates from the lateral border of the scapula and inserts onto the middle facet of the greater tubercle — it is the most posterior of the four",
+      "It originates from the subscapular fossa on the anterior surface of the scapula and inserts onto the lesser tubercle — the only rotator cuff muscle on the anterior scapula and the only one at the lesser tubercle",
+      "It originates from the coracoid process and inserts onto the lesser tubercle — the only muscle with a coracoid origin in the rotator cuff"
+    ],
+    correct: 2,
+    exp: "<strong>Subscapular fossa (anterior surface) → lesser tubercle.</strong> While the other three live on the posterior scapula and all insert onto the greater tubercle, subscapularis hides on the anterior surface (facing the ribcage, hidden from behind) and goes alone to the lesser tubercle. It is the exception in both location and insertion."
+  },
+  {
+    tag: "The Introvert — action and nerve",
+    q: "INTrovert = INTernal rotation. What is the nerve supply of subscapularis — and what makes it clinically distinct to assess?",
+    options: [
+      "Suprascapular nerve (C5, C6). It is clinically distinct because it passes through the subacromial space.",
+      "Axillary nerve (C5, C6). It is clinically distinct because it is the largest and strongest rotator cuff muscle.",
+      "Upper and lower subscapular nerves (C5, C6, C7). It is clinically distinct because it is on the anterior surface and cannot be reached from behind — requiring lift-off and belly-press tests.",
+      "Musculocutaneous nerve (C5, C6). It is clinically distinct because it shares innervation with the biceps brachii."
+    ],
+    correct: 2,
+    exp: "<strong>Upper and lower subscapular nerves (C5, C6, C7). Anterior surface — not reachable from behind.</strong> Because subscapularis sits on the front of the scapula facing the ribcage, it cannot be directly assessed through the posterior approach. Clinically: lift-off test (hand behind back, lift away from spine) and belly-press test (press hand into abdomen — elbow dropping forward = subscapularis failure)."
+  },
+  {
+    tag: "The contrast",
+    q: "Three rotator cuff muscles are visible from behind. One is not. Which is the hidden muscle — and what is the clinical consequence of this?",
+    options: [
+      "Infraspinatus is hidden because it is deep to teres minor — requiring ultrasound guidance for assessment",
+      "Teres minor is hidden because it is deep to the deltoid — requiring special posterior access techniques",
+      "Supraspinatus is hidden under the acromion — requiring the empty can test to access its tendon",
+      "Subscapularis is hidden on the anterior surface of the scapula — it cannot be reached from behind, requiring intraoral-equivalent anterior access via the lift-off and belly-press tests"
+    ],
+    correct: 3,
+    exp: "<strong>Subscapularis — anterior surface — cannot be reached from behind.</strong> Supraspinatus, infraspinatus, and teres minor all live on the posterior scapula and are visible and palpable from behind. Subscapularis faces the ribcage. The lift-off test and belly-press test are the primary clinical assessments because direct posterior palpation is not possible."
+  },
+  {
+    tag: "Suprascapular nerve",
+    q: "A patient presents with weakness of both shoulder abduction initiation AND lateral rotation. Which nerve injury should this combined pattern raise suspicion of — and why?",
+    options: [
+      "Axillary nerve injury — it supplies both the deltoid and teres minor, explaining the combined weakness",
+      "Suprascapular nerve injury — it innervates both supraspinatus (abduction initiation) and infraspinatus (lateral rotation), so a single nerve lesion can produce both deficits simultaneously",
+      "Upper subscapular nerve injury — it supplies both supraspinatus and subscapularis, explaining the mixed pattern",
+      "Long thoracic nerve injury — it supplies serratus anterior which stabilises the scapula, affecting both movements indirectly"
+    ],
+    correct: 1,
+    exp: "<strong>Suprascapular nerve (C5, C6) — innervates both supraspinatus AND infraspinatus.</strong> This is the high-yield exam point from this video. The suprascapular nerve is the only nerve in the rotator cuff that serves two muscles. Weakness of abduction initiation alone might suggest isolated supraspinatus pathology, but when lateral rotation weakness is also present, the pattern points to the shared nerve rather than two separate muscle tears."
+  },
+  {
+    tag: "Full SITS summary",
+    q: "Which of the following correctly summarises all four rotator cuff muscles in SITS order — origin, insertion, action?",
+    options: [
+      "Supraspinatus: supraspinous fossa → superior facet greater tubercle, abduction. Infraspinatus: infraspinous fossa → middle facet greater tubercle, lateral rotation. Teres minor: lateral border → inferior facet greater tubercle, lateral rotation. Subscapularis: subscapular fossa → lesser tubercle, medial rotation.",
+      "Supraspinatus: infraspinous fossa → middle facet greater tubercle, lateral rotation. Infraspinatus: supraspinous fossa → superior facet greater tubercle, abduction. Teres minor: subscapular fossa → lesser tubercle, medial rotation. Subscapularis: lateral border → inferior facet greater tubercle, lateral rotation.",
+      "Supraspinatus: supraspinous fossa → lesser tubercle, abduction. Infraspinatus: infraspinous fossa → superior facet greater tubercle, medial rotation. Teres minor: lateral border → middle facet greater tubercle, lateral rotation. Subscapularis: subscapular fossa → greater tubercle, lateral rotation.",
+      "Supraspinatus: supraspinous fossa → superior facet greater tubercle, medial rotation. Infraspinatus: infraspinous fossa → inferior facet greater tubercle, lateral rotation. Teres minor: subscapular fossa → lesser tubercle, abduction. Subscapularis: lateral border → middle facet greater tubercle, medial rotation."
+    ],
+    correct: 0,
+    exp: "<strong>Option A is correct.</strong> Supraspinatus: supraspinous fossa → superior facet greater tubercle → abduction (the prince ABDicated). Infraspinatus: infraspinous fossa → middle facet → lateral rotation (extrovert, bigger = middle). Teres minor: lateral border → inferior facet → lateral rotation (extrovert, smaller = lower). Subscapularis: subscapular fossa → lesser tubercle → medial rotation (the introvert, alone at the lesser tubercle)."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. The prince, the extroverts, and the introvert are all permanently in your long-term memory. Max would consider this the expected outcome. Antony would not."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the character they belong to, and retake. The characters are the anchors — once each one is solid, the anatomy follows automatically."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific scenes for the muscles you missed and re-watch. Then retake immediately — the combination of re-watching and re-testing is far more effective than either alone."; skull = "💀"; }
+  else { msg = "Re-watch the full video focusing on the three characters — the Prince, the Extroverts, and the Introvert. Once the characters are clear the anatomy will follow. Then retake this quiz."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
