@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brachial Plexus Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 1.05rem; color: #FFD700; margin-bottom: 0.4rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.8rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.75rem; }
+  .mnemonic-reminder .marmu { font-size: 0.85rem; color: #FFD700; font-family: Arial, sans-serif; text-align: center; margin-top: 0.5rem; }
+  .mnemonic-reminder .marmu-sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Brachial Plexus — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>Rowdy Truckers Drink Cold Beers</p>
+      <div class="sub">Roots · Trunks · Divisions · Cords · Branches — 5 · 3 · 6 · 3 · 5</div>
+      <p class="marmu">Musclemen Act Radically in Medium Underwear</p>
+      <div class="marmu-sub">Musculocutaneous · Axillary · Radial · Median · Ulnar</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: C D A B C A D B C D A B = A×3 B×3 C×3 D×3
+const questions = [
+  {
+    tag: "Master mnemonic",
+    q: "Rowdy Truckers Drink Cold Beers gives you the five levels of the brachial plexus. What does each word stand for — in the correct order?",
+    options: [
+      "Roots, Trunks, Dermatomes, Cords, Branches",
+      "Rami, Trunks, Divisions, Cords, Bundles",
+      "Roots, Trunks, Divisions, Cords, Branches",
+      "Roots, Trunks, Divisions, Channels, Branches"
+    ],
+    correct: 2,
+    exp: "<strong>Roots, Trunks, Divisions, Cords, Branches.</strong> R=Roots (C5-T1 ventral rami), T=Trunks (upper/middle/lower), D=Divisions (anterior + posterior, 6 total), C=Cords (lateral/posterior/medial — named relative to the axillary artery), B=Branches (the five terminal branches). Every letter maps exactly."
+  },
+  {
+    tag: "Trunks",
+    q: "Which roots combine to form each of the three trunks — and which root travels alone?",
+    options: [
+      "C5+C6 = upper; C7+C8 = middle; T1 alone = lower",
+      "C5 alone = upper; C6+C7 = middle; C8+T1 = lower",
+      "C5+C6 = upper; C7+C8+T1 = middle; no lower trunk",
+      "C5+C6 = upper; C7 alone = middle; C8+T1 = lower"
+    ],
+    correct: 3,
+    exp: "<strong>C5+C6 = upper trunk. C7 alone = middle trunk. C8+T1 = lower trunk.</strong> C7 is the lone traveller — it enters and exits the middle trunk without combining with any other root. Think of the motorway lanes: five narrowing to three, with C7 keeping its own lane through the middle."
+  },
+  {
+    tag: "Long thoracic nerve",
+    q: "The long thoracic nerve is the most frequently tested root-level clinical presentation. What are its roots, what does it supply, and what happens when it is damaged?",
+    options: [
+      "C5, C6, C7 — supplies serratus anterior — damage produces winged scapula",
+      "C5, C6 — supplies rhomboids and levator scapulae — damage produces winging of the scapula",
+      "C8, T1 — supplies intrinsic hand muscles — damage produces claw hand",
+      "C5, C6, C7, C8 — supplies pectoralis major — damage produces loss of shoulder adduction"
+    ],
+    correct: 0,
+    exp: "<strong>C5, C6, C7 → serratus anterior → winged scapula if damaged.</strong> The long thoracic nerve arises directly from the roots before the trunks even form. It supplies serratus anterior — the muscle that holds the scapula flat against the thorax. When it is damaged, serratus is paralysed, the scapula wings outward, and the patient cannot push against a wall without the medial border of the scapula lifting away from the thorax."
+  },
+  {
+    tag: "Divisions",
+    q: "What is the fundamental rule that governs which muscles the anterior and posterior divisions of the brachial plexus supply?",
+    options: [
+      "Anterior divisions supply the extensors; posterior divisions supply the flexors — reflecting the embryological rotation of the upper limb",
+      "Anterior divisions supply the flexors; posterior divisions supply the extensors — reflecting the developmental organisation of the limb",
+      "Anterior divisions supply proximal muscles; posterior divisions supply distal muscles",
+      "Anterior and posterior divisions supply the same muscles — the division is anatomical, not functional"
+    ],
+    correct: 1,
+    exp: "<strong>Anterior divisions = flexors. Posterior divisions = extensors.</strong> This reflects the fundamental developmental organisation of the limb — flexors anteriorly, extensors posteriorly. You do not need to memorise which specific divisions combine to form which cord. If you know this rule, you can reconstruct the logic: the posterior cord receives all three posterior divisions because it needs to supply all the extensors."
+  },
+  {
+    tag: "Cords",
+    q: "The three cords of the brachial plexus are named lateral, posterior, and medial. What are they named relative to — and why does this matter?",
+    options: [
+      "Named relative to each other — lateral is most lateral, medial is most medial, posterior is between them",
+      "Named relative to the clavicle — lateral is below the lateral clavicle, posterior is behind it, medial is below the medial clavicle",
+      "Named relative to the axillary artery — lateral cord is lateral to the artery, posterior cord is posterior to it, medial cord is medial to it",
+      "Named relative to the humerus — reflecting where each cord's branches ultimately terminate in the arm"
+    ],
+    correct: 2,
+    exp: "<strong>Named relative to the axillary artery — not to each other.</strong> The axillary artery runs through the axilla and the three cords wrap around it. Lateral cord is lateral to the artery. Posterior cord is posterior. Medial cord is medial. The artery is the anchor. MPL: Medial, Posterior, Lateral. Without this reference point the names are arbitrary; with it they are logical."
+  },
+  {
+    tag: "Terminal branches — cord origins",
+    q: "The five terminal branches each arise from specific cords. Which cord gives rise to both the musculocutaneous nerve and the lateral root of the median nerve?",
+    options: [
+      "The lateral cord — it receives anterior divisions of the upper and middle trunks, supplying flexor compartment structures in the anterior arm",
+      "The posterior cord — it receives all three posterior divisions and gives rise to the two largest branches",
+      "The medial cord — it is the anterior division of the lower trunk and gives rise to the ulnar-sided branches",
+      "The posterior cord and lateral cord jointly — the musculocutaneous and median arise from both together"
+    ],
+    correct: 0,
+    exp: "<strong>The lateral cord gives rise to the musculocutaneous nerve and the lateral root of the median nerve.</strong> The lateral cord is formed from the anterior divisions of the upper and middle trunks — anterior divisions supply flexors, and the musculocutaneous nerve supplies the flexors of the anterior arm (biceps, brachialis, coracobrachialis). The medial cord contributes the other root of the median nerve, which is why the median nerve is the only terminal branch with two cord origins."
+  },
+  {
+    tag: "Cord origins of terminal branches",
+    q: "The radial and axillary nerves both arise from the same cord. Which cord — and what is the functional logic behind this?",
+    options: [
+      "Both arise from the lateral cord — because both supply muscles lateral to the midline of the arm",
+      "Both arise from the medial cord — because both supply the medial compartment of the arm",
+      "Both arise from the lateral cord and the medial cord jointly — like the median nerve",
+      "Both arise from the posterior cord — because both supply posterior compartment (extensor) structures"
+    ],
+    correct: 3,
+    exp: "<strong>Both arise from the posterior cord.</strong> The posterior cord receives all three posterior divisions — the divisions that supply extensor compartment muscles. The radial nerve supplies all the extensors of the arm and forearm. The axillary nerve supplies the deltoid (an abductor/extensor) and teres minor (a lateral rotator). Both are posterior compartment nerves. The posterior cord is their shared origin because the logic is consistent: posterior cord = posterior compartment supply."
+  },
+  {
+    tag: "Median nerve",
+    q: "The median nerve is unique among the five terminal branches. What makes it anatomically distinct from all the others?",
+    options: [
+      "It is the only terminal branch that passes through the carpal tunnel",
+      "It is the only terminal branch that arises from two cords — a lateral root from the lateral cord and a medial root from the medial cord",
+      "It is the largest terminal branch and gives rise to the most motor branches in the forearm",
+      "It is the only terminal branch that supplies both the arm and the forearm"
+    ],
+    correct: 1,
+    exp: "<strong>The median nerve has two cord origins — lateral root from the lateral cord, medial root from the medial cord.</strong> They join in front of the axillary artery to form one nerve. Think of two rivers joining: the lateral river and the medial river merge into one median nerve. The nerve is named for its central position — median, midline, middle. All other terminal branches arise from a single cord. The median nerve is the only exception."
+  },
+  {
+    tag: "Radial nerve",
+    q: "The radial nerve is the largest terminal branch of the brachial plexus. Where is it most vulnerable to injury — and what is the classic clinical result?",
+    options: [
+      "Most vulnerable at the carpal tunnel where it passes under the flexor retinaculum — produces loss of thumb sensation",
+      "Most vulnerable at the quadrilateral space where it exits the axilla — produces loss of deltoid function",
+      "Most vulnerable in the radial groove on the posterior humerus — midshaft humeral fracture produces wrist drop from loss of wrist extension",
+      "Most vulnerable at the elbow where it winds around the lateral epicondyle — produces weakness of finger extension only"
+    ],
+    correct: 2,
+    exp: "<strong>Radial groove on the posterior humerus — midshaft humeral fracture — wrist drop.</strong> The radial nerve winds around the posterior humerus in the radial groove. A midshaft humeral fracture can stretch or sever the nerve at this point. The result is wrist drop — loss of wrist extension — because the radial nerve supplies all the extensors of the arm and forearm. The nerve travels in the groove and breaks with the bone."
+  },
+  {
+    tag: "Clinical three injuries",
+    q: "Three terminal branch injuries are the most clinically important to recognise instantly. Match each injury pattern to its nerve.",
+    options: [
+      "Wrist drop = median nerve; carpal tunnel syndrome = ulnar nerve; claw hand = radial nerve",
+      "Wrist drop = ulnar nerve; carpal tunnel syndrome = radial nerve; claw hand = median nerve",
+      "Wrist drop = radial nerve; carpal tunnel syndrome = ulnar nerve; claw hand = median nerve",
+      "Wrist drop = radial nerve; carpal tunnel syndrome = median nerve; claw hand = ulnar nerve (damaged at wrist)"
+    ],
+    correct: 3,
+    exp: "<strong>Wrist drop = radial. Carpal tunnel = median. Claw hand = ulnar (at wrist).</strong> Radial — radial groove — wrist drop. Median — carpal tunnel — most common nerve compression in the entire body. Ulnar — ulnar side — claw hand when damaged at the wrist, because loss of the intrinsic hand muscles removes the balance against the long flexors. Three injuries. Three nerves. Recognise them instantly."
+  },
+  {
+    tag: "Suprascapular nerve connection",
+    q: "The suprascapular nerve connects the brachial plexus video directly to the rotator cuff video. Where does it arise — and what does it supply?",
+    options: [
+      "Arises from the posterior cord — supplies infraspinatus and teres minor — the two extrovert muscles of the rotator cuff",
+      "Arises from the upper trunk — supplies supraspinatus and infraspinatus — two of the four SITS muscles",
+      "Arises from the C5 root directly before the trunks form — supplies supraspinatus only",
+      "Arises from the lateral cord — supplies supraspinatus and subscapularis — the two muscles most commonly injured in the rotator cuff"
+    ],
+    correct: 1,
+    exp: "<strong>Arises from the upper trunk (C5, C6) — supplies supraspinatus and infraspinatus.</strong> The suprascapular nerve is a trunk-level branch, arising from the upper trunk before the divisions form. It supplies two of the four SITS muscles — the Spoiled Prince (supraspinatus) and the bigger Extrovert (infraspinatus). This is why suprascapular nerve injury produces weakness of both abduction initiation and lateral rotation simultaneously — two muscles, one nerve."
+  },
+  {
+    tag: "Full structure summary",
+    q: "Which of the following correctly states the number of structures at each level of the brachial plexus?",
+    options: [
+      "5 roots, 3 trunks, 4 divisions, 3 cords, 5 branches",
+      "5 roots, 3 trunks, 6 divisions, 3 cords, 5 branches",
+      "6 roots, 3 trunks, 6 divisions, 3 cords, 6 branches",
+      "5 roots, 4 trunks, 6 divisions, 3 cords, 5 branches"
+    ],
+    correct: 1,
+    exp: "<strong>5 roots, 3 trunks, 6 divisions, 3 cords, 5 branches.</strong> Five roots (C5-T1). Three trunks (upper/middle/lower). Six divisions — each of the three trunks splits into anterior and posterior, giving 3×2=6. Three cords (lateral/posterior/medial). Five terminal branches (MARMU). The only number students consistently miss is 6 divisions. Three trunks, each splitting in two — always six."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. The brachial plexus — once the diagram that caused the most student suffering — is now fully mapped in your long-term memory. Max would find this unremarkable. Antony would not."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Rowdy Truckers Drink Cold Beers is now a permanent structure in your memory. Review the questions you missed, find the corresponding level in the diagram, then retake."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific scenes for the levels you missed and re-watch. The diagram will start making sense as a logic, not a list of facts to memorise. Retake immediately after."; skull = "💀"; }
+  else { msg = "Re-watch the full video. Focus on the five levels in order — Rowdy Truckers Drink Cold Beers — and trace each level on the diagram as it is named. Then retake this quiz. The logic will click."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
