@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biceps, Brachialis, Coracobrachialis Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 1rem; color: #FFD700; margin-bottom: 0.4rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.78rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.6rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Biceps, Brachialis, and Coracobrachialis — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>sCapula has a coraCoid · ulNa (and maNdible) has a coraNoid</p>
+      <div class="sub">C to C, N to N — one letter tells you the bone</div>
+      <p>The long heads long for the glenoid</p>
+      <div class="sub">SUPRAglenoid = biceps · INFRAglenoid = triceps</div>
+      <p>Two heads, one job — supinate and flex</p>
+      <div class="sub">The biceps is your biological screwdriver</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: B D A C B A D C B D A C = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "Musculocutaneous nerve",
+    q: "Where does the musculocutaneous nerve arise, and what does it supply on its way through the arm?",
+    options: [
+      "Arises from the posterior cord; supplies coracobrachialis, biceps, and brachialis before becoming the medial cutaneous nerve of the forearm",
+      "Arises from the lateral cord at the level of the coracoid process; pierces coracobrachialis, runs between biceps and brachialis, then becomes the lateral cutaneous nerve of the forearm",
+      "Arises from the medial cord; supplies only biceps brachii before terminating at the elbow",
+      "Arises from the lateral cord; supplies the deltoid and teres minor before becoming the axillary nerve"
+    ],
+    correct: 1,
+    exp: "<strong>Lateral cord, C5-C7 — pierces coracobrachialis, runs between biceps and brachialis, becomes the lateral cutaneous nerve of the forearm.</strong> The name tells you everything: MUSCULOcutaneous — muscles in the arm, cutaneous sensation in the forearm. One nerve, three muscles, then skin."
+  },
+  {
+    tag: "Coracoid companions",
+    q: "Coracobrachialis and biceps short head are called \"coracoid companions.\" What does this mean?",
+    options: [
+      "They share the same insertion point on the humerus",
+      "They are both innervated by the axillary nerve",
+      "They are the two smallest muscles of the anterior arm",
+      "They share the same origin — the coracoid process of the scapula — despite having different insertions"
+    ],
+    correct: 3,
+    exp: "<strong>Same origin, different destinations.</strong> Coracobrachialis and the short head of biceps brachii both originate from the coracoid process of the scapula. The coracoid process is a busy attachment point — two muscles starting from the same block before going their separate ways."
+  },
+  {
+    tag: "Coracoid vs coronoid",
+    q: "Which mnemonic correctly distinguishes the coracoid process from the coronoid process?",
+    options: [
+      "sCapula has a coraCoid (C to C); ulNa and maNdible have a coraNoid (N to N)",
+      "sCapula has a coraNoid; ulNa has a coraCoid",
+      "Coracoid and coronoid both refer to the same process on different bones",
+      "Only the humerus has a coracoid process; the coronoid process does not exist"
+    ],
+    correct: 0,
+    exp: "<strong>sCapula-coraCoid (C↔C). UlNa-coraNoid (N↔N). MaNdible-coraNoid too (N↔N).</strong> One shared letter locks in the correct bone every time — no more mixing up which process belongs where."
+  },
+  {
+    tag: "Biceps two heads",
+    q: "Where do the two heads of biceps brachii originate, and where do they insert?",
+    options: [
+      "Both heads originate from the coracoid process; insert onto the ulnar tuberosity",
+      "Long head from the coracoid process, short head from the supraglenoid tubercle; insert onto the olecranon",
+      "Long head from the supraglenoid tubercle (intra-articular course), short head from the coracoid process; both insert via a common tendon onto the radial tuberosity",
+      "Both heads originate from the infraglenoid tubercle; insert onto the coronoid process"
+    ],
+    correct: 2,
+    exp: "<strong>Long head: supraglenoid tubercle, intra-articular course. Short head: coracoid process. Both insert onto the radial tuberosity.</strong> The two heads have completely different origins but merge into one muscle belly with one job."
+  },
+  {
+    tag: "Long heads long for the glenoid",
+    q: "The mnemonic \"the long heads long for the glenoid\" applies to biceps too. What does SUPRAglenoid mean for biceps' long head?",
+    options: [
+      "Below the joint, posterior scapula — same as triceps",
+      "Above the joint, anterior scapula — the long head arches up and over the front of the joint to get there",
+      "Lateral to the joint, on the humeral shaft",
+      "SUPRAglenoid refers to the ulna, not the scapula"
+    ],
+    correct: 1,
+    exp: "<strong>Above the joint, anterior scapula.</strong> SUPRA means above. Biceps' long head starts above the glenoid on the front of the scapula and arches over the top of the shoulder into the front of the arm — the mirror image of triceps' long head, which starts INFRAglenoid on the back."
+  },
+  {
+    tag: "Two heads, one job",
+    q: "\"Two heads, one job — supinate and flex.\" Which action is the more powerful and more distinctive of the two, and what is the memory device for it?",
+    options: [
+      "Supination — the screwdriver mnemonic: clockwise rotation (for a right hand) is supination, and biceps is your biological screwdriver",
+      "Elbow flexion — the hinge mnemonic: biceps acts like a door hinge closing",
+      "Supination — the corkscrew mnemonic: counterclockwise rotation is supination",
+      "Elbow flexion — most students already know this, so there is no dedicated memory device"
+    ],
+    correct: 0,
+    exp: "<strong>Supination — the screwdriver.</strong> A screwdriver turns clockwise to drive a screw in for a right hand — that rotation is supination. The biceps is your biological screwdriver. Everyone remembers elbow flexion; almost nobody leads with supination, even though it is the more distinctive action."
+  },
+  {
+    tag: "Biceps tendinopathy",
+    q: "Why does the long head of biceps commonly cause deep anterior shoulder pain, and how is it clinically tested?",
+    options: [
+      "Because it inserts onto the coracoid process; tested with the empty can test",
+      "Because it is innervated by the axillary nerve; tested with the drop arm test",
+      "Because it crosses the elbow joint; tested with Cozen's test",
+      "Because its tendon is intra-articular, running within the joint capsule; tested with Speed's test and Yergason's test"
+    ],
+    correct: 3,
+    exp: "<strong>Intra-articular tendon within the joint capsule — Speed's test and Yergason's test.</strong> The long head tendon runs within the shoulder joint capsule and helps depress the humeral head against the glenoid during abduction. Inflammation or degeneration here produces anterior shoulder pain aggravated by resisted supination and forward flexion."
+  },
+  {
+    tag: "Brachialis anatomy",
+    q: "What is brachialis' primary action, and what is distinctive about its nerve supply?",
+    options: [
+      "Elbow flexion and supination; innervated solely by the radial nerve",
+      "Elbow extension only; innervated solely by the musculocutaneous nerve",
+      "Elbow flexion only (no supination); innervated primarily by the musculocutaneous nerve, with a small additional branch from the radial nerve",
+      "Shoulder flexion and adduction; innervated by the axillary nerve"
+    ],
+    correct: 2,
+    exp: "<strong>Elbow flexion only, no supination. Dual innervation: musculocutaneous nerve plus a small radial nerve branch.</strong> Unlike biceps, brachialis does not rotate the forearm — it flexes the elbow with equal force whether the forearm is supinated or pronated."
+  },
+  {
+    tag: "Coronoid process payoff",
+    q: "Brachialis inserts partly onto the coronoid process. Which mnemonic locks in which bones have a coronoid process?",
+    options: [
+      "sCapula has a coraNoid; ulNa has a coraCoid",
+      "ulNa has a coraNoid (N to N) — and the maNdible has one too, same N, same rule",
+      "Only the ulna has a coronoid process; no other bone does",
+      "The coronoid process belongs to the radius, not the ulna"
+    ],
+    correct: 1,
+    exp: "<strong>ulNa has a coraNoid — N to N. The maNdible has one too, same N, same rule.</strong> This is the payoff to the mnemonic planted earlier at coracobrachialis: sCapula-coraCoid (C to C) versus ulNa-coraNoid (N to N). One letter, and the two processes never get confused again."
+  },
+  {
+    tag: "Isolating brachialis",
+    q: "How do you clinically isolate brachialis from biceps during elbow flexion testing?",
+    options: [
+      "Flex the elbow with the forearm fully supinated — this isolates brachialis because biceps is strongest here",
+      "Extend the wrist while flexing the elbow",
+      "Test elbow flexion with the shoulder abducted to 90 degrees",
+      "Flex the elbow with the forearm pronated — biceps is mechanically disadvantaged in this position, so brachialis does the work"
+    ],
+    correct: 3,
+    exp: "<strong>Flex the elbow with the forearm pronated.</strong> Because brachialis does not rotate the forearm, it flexes with equal strength in any position. Biceps, by contrast, is much stronger in supination and mechanically disadvantaged when pronated — so pronating the forearm isolates brachialis."
+  },
+  {
+    tag: "Musculocutaneous nerve damage",
+    q: "A patient presents with weakness of elbow flexion, loss of forearm supination, and numbness over the lateral forearm. Which nerve is most likely involved?",
+    options: [
+      "Musculocutaneous nerve — it supplies all three muscles plus the lateral forearm skin, so damage produces this exact combined pattern",
+      "Radial nerve — it supplies the extensors and produces wrist drop, not this pattern",
+      "Median nerve — it supplies the flexors of the wrist and hand, not the arm",
+      "Axillary nerve — it supplies the deltoid and produces shoulder weakness, not this pattern"
+    ],
+    correct: 0,
+    exp: "<strong>Musculocutaneous nerve.</strong> If the musculocutaneous nerve is damaged, all three muscles it supplies fail together: elbow flexion gone, forearm supination gone, lateral forearm numb. This combined pattern is one of the cleaner diagnostic pictures in upper limb neurology — recognise the pattern, name the nerve."
+  },
+  {
+    tag: "Full summary",
+    q: "Coracobrachialis, biceps brachii, and brachialis share what in common?",
+    options: [
+      "All three insert onto the same bone — the radius",
+      "All three are innervated by the radial nerve",
+      "All three are innervated by the musculocutaneous nerve, arising from the lateral cord of the brachial plexus",
+      "All three cross both the shoulder and elbow joints"
+    ],
+    correct: 2,
+    exp: "<strong>All three are innervated by the musculocutaneous nerve — C5 to C7, lateral cord.</strong> Their origins and insertions differ completely, but the nerve supply is the thread connecting all three. If the nerve goes, all three go together."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. Coracoid companions, the biological screwdriver, the hidden workhorse — all locked in. Max would call this the expected outcome. Antony would call it Big Beautiful Curls."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching scene, then retake. One nerve, three muscles — almost the whole picture is there."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific scenes for the muscles you missed and re-watch. Then retake immediately — re-watching and re-testing together is far more effective than either alone."; skull = "💀"; }
+  else { msg = "Re-watch the full video, focusing on the musculocutaneous nerve as the thread connecting all three muscles. Then retake this quiz — the pattern will click once the nerve path is clear."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
