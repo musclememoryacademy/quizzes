@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latissimus Dorsi and Teres Major Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 1rem; color: #FFD700; margin-bottom: 0.4rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.78rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.6rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Latissimus Dorsi and Teres Major — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>ADd + MEd + EXt = the pull</p>
+      <div class="sub">Both muscles, all three actions, simultaneously</div>
+      <p>Latissimus = floor · Teres major = medial lip</p>
+      <div class="sub">Same groove, adjacent insertions</div>
+      <p>Teres MAJOR = lower + medial rotation · Teres MINOR = higher + lateral rotation</p>
+      <div class="sub">Opposite in size and in action</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: D B C A D C B A D B C A = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "Why grouped together",
+    q: "Latissimus dorsi and teres major are covered in the same video. What is the basis for grouping them?",
+    options: [
+      "They share the same nerve supply exactly",
+      "They are adjacent muscles with no functional relationship",
+      "They both originate from the vertebral column",
+      "They share the same three primary actions, insert into the same groove on the humerus, and work together in pulling, swimming, climbing, and rowing"
+    ],
+    correct: 3,
+    exp: "<strong>Same actions, same groove, same function.</strong> Latissimus dorsi and teres major share adduction, medial rotation, and extension of the humerus, insert into the same intertubercular sulcus, and work together in every pulling and reaching movement the upper limb performs. They are not paired by proximity — they are paired by being functionally identical at the glenohumeral joint."
+  },
+  {
+    tag: "Latissimus dorsi origin",
+    q: "Latissimus dorsi has an unusually extensive origin. Which structures does it NOT arise from?",
+    options: [
+      "Spinous processes of the lower six thoracic vertebrae via the thoracolumbar fascia",
+      "The acromion and coracoid process of the scapula",
+      "The posterior third of the iliac crest",
+      "The lower three or four ribs, interdigitating with the external oblique"
+    ],
+    correct: 1,
+    exp: "<strong>The acromion and coracoid process are NOT part of latissimus dorsi's origin.</strong> Its actual origin is vast: lower thoracic vertebrae, thoracolumbar fascia covering the lumbar and sacral regions, the iliac crest, the lower ribs, and — in about half of individuals — the inferior angle of the scapula. The acromion and coracoid process belong to other muscles (deltoid, coracobrachialis, biceps short head)."
+  },
+  {
+    tag: "Latissimus dorsi insertion",
+    q: "Latissimus dorsi's tendon undergoes a distinctive twist before inserting. What happens, and why does it matter?",
+    options: [
+      "The tendon splits into two separate insertions on the radius and ulna",
+      "The tendon does not twist — it inserts directly where it originates",
+      "The tendon twists approximately 180 degrees, so the fibres most inferior at the origin become most superior at the insertion — this twist gives the muscle its pulling leverage",
+      "The tendon twists 90 degrees to insert on the coracoid process"
+    ],
+    correct: 2,
+    exp: "<strong>The tendon twists roughly 180 degrees.</strong> The muscle originates posteriorly and inferiorly across the back, but the tendon twists as it approaches the humerus so the most inferior fibres at origin become the most superior at insertion. This twist is what gives latissimus dorsi its mechanical leverage for pulling movements."
+  },
+  {
+    tag: "Shared actions — the pull",
+    q: "The mnemonic ADd + MEd + EXt describes latissimus dorsi's three actions. Using a pull-up as the example, what happens to the arm from start to finish?",
+    options: [
+      "Arm moves from abducted and externally rotated (grabbing the bar) to adducted, medially rotated, and extended (pulling up) — all three actions happening simultaneously",
+      "Arm moves from adducted to abducted throughout the entire movement",
+      "Arm stays in a fixed position while only the forearm moves",
+      "Arm flexes and supinates throughout the pull-up"
+    ],
+    correct: 0,
+    exp: "<strong>Abducted/externally rotated → adducted/medially rotated/extended, all at once.</strong> You grab the bar with the arm abducted and externally rotated. As you pull yourself up, the arm adducts, medially rotates, and extends simultaneously — latissimus dorsi is the engine driving all three actions at the same time."
+  },
+  {
+    tag: "Latissimus dorsi nerve",
+    q: "What nerve innervates latissimus dorsi, and where does it arise from?",
+    options: [
+      "Lower subscapular nerve, C5 and C6, from the posterior cord",
+      "Axillary nerve, C5 and C6, from the posterior cord",
+      "Musculocutaneous nerve, C5 to C7, from the lateral cord",
+      "Thoracodorsal nerve, C6, C7, and C8, from the posterior cord of the brachial plexus"
+    ],
+    correct: 3,
+    exp: "<strong>Thoracodorsal nerve — C6, C7, C8 — posterior cord.</strong> It descends along the posterior axillary wall to reach the deep surface of latissimus dorsi. Posterior cord origin fits the pattern: latissimus dorsi is a posterior compartment muscle, and posterior compartment muscles trace back to the posterior cord."
+  },
+  {
+    tag: "Teres major — Little Latissimus",
+    q: "Why is teres major nicknamed the Little Latissimus?",
+    options: [
+      "It originates from the same vertebrae as latissimus dorsi",
+      "It is innervated by the same nerve as latissimus dorsi",
+      "It shares the same three primary actions and inserts into the same groove on the humerus as latissimus dorsi, just on a smaller scale",
+      "It is located directly on top of latissimus dorsi"
+    ],
+    correct: 2,
+    exp: "<strong>Same actions, same groove, smaller scale.</strong> Teres major produces adduction, medial rotation, and extension — identical to latissimus dorsi. It inserts into the same intertubercular sulcus. It is simply a smaller, scapula-only version of the same functional package — hence the Little Latissimus."
+  },
+  {
+    tag: "Floor vs medial lip",
+    q: "Latissimus dorsi and teres major insert into the same groove but onto different parts of it. Which pairing is correct?",
+    options: [
+      "Latissimus = medial lip; Teres major = floor",
+      "Latissimus = floor; Teres major = medial lip",
+      "Latissimus = lateral lip; Teres major = floor",
+      "Both insert onto the exact same point — the floor"
+    ],
+    correct: 1,
+    exp: "<strong>Latissimus = floor. Teres major = medial lip.</strong> Same groove, adjacent positions, right next to each other. This is the one detail worth keeping straight — the two muscles do not insert at the exact same point, even though everything else about them is functionally identical."
+  },
+  {
+    tag: "Teres major vs teres minor",
+    q: "Teres major and teres minor are frequently confused. What is the key difference in their action?",
+    options: [
+      "Teres major medially rotates the humerus; teres minor laterally rotates it — opposite actions",
+      "Teres major laterally rotates; teres minor medially rotates",
+      "Both muscles produce the exact same rotation",
+      "Neither muscle produces rotation — only adduction"
+    ],
+    correct: 0,
+    exp: "<strong>Teres major medially rotates. Teres minor laterally rotates. Opposite actions.</strong> Teres minor was one of the Extroverts from the rotator cuff video — it externally rotates. Teres major does the opposite: internal rotation. Major and minor are opposite in both size and rotational direction — never assume they behave the same way just because the names are similar."
+  },
+  {
+    tag: "Major/minor height mnemonic",
+    q: "The height mnemonic links MAJOR/MINOR to position on the back. How does it work?",
+    options: [
+      "MAJOR sits higher because it is more important; MINOR sits lower",
+      "Both muscles sit at the exact same height on the scapula",
+      "MAJOR and MINOR refer to muscle strength, not position",
+      "MAJOR = bigger = partners with the biggest back muscle (latissimus) = originates LOWER; MINOR = smaller = partners with the rotator cuff = originates HIGHER"
+    ],
+    correct: 3,
+    exp: "<strong>MAJOR pairs with latissimus (lower on the back). MINOR pairs with the rotator cuff (higher, at the scapula).</strong> Teres major sits at the inferior angle of the scapula — low, next to where latissimus dorsi's broad origin extends. Teres minor sits higher on the lateral border, alongside the other rotator cuff muscles. Size of the muscle's partner predicts its height."
+  },
+  {
+    tag: "Intertubercular sulcus",
+    q: "Four structures converge on the intertubercular sulcus. Which pairing is correct?",
+    options: [
+      "Lateral lip = latissimus; Floor = teres major; Medial lip = pectoralis major; Within = triceps tendon",
+      "Lateral lip = pectoralis major; Floor = latissimus dorsi; Medial lip = teres major; Within = long head of biceps tendon",
+      "Lateral lip = biceps; Floor = pectoralis major; Medial lip = latissimus; Within = teres major",
+      "Only two structures insert here — latissimus and teres major"
+    ],
+    correct: 1,
+    exp: "<strong>Lateral lip = pectoralis major. Floor = latissimus dorsi. Medial lip = teres major. Within = long head of biceps tendon.</strong> Four powerful structures converge on one groove, which is why the intertubercular sulcus is a common site of anterior shoulder pain when any of these tendons are inflamed or compressed."
+  },
+  {
+    tag: "Posterior axillary fold",
+    q: "What is the posterior axillary fold, and what does palpating it tell you?",
+    options: [
+      "A ligament that only teres minor contributes to",
+      "A bony landmark palpable only on X-ray",
+      "The muscular fold running from the scapula toward the arm when abducted — palpating it assesses both latissimus dorsi and teres major simultaneously",
+      "A nerve pathway that has no muscular component"
+    ],
+    correct: 2,
+    exp: "<strong>The posterior axillary fold — palpating it assesses both muscles at once.</strong> When the arm is abducted, this muscular fold runs from the scapula toward the arm. Because latissimus dorsi and teres major sit side by side at the bottom of the intertubercular sulcus, palpating this fold picks up both muscles simultaneously."
+  },
+  {
+    tag: "Full summary",
+    q: "What do latissimus dorsi and teres major have in common regarding their nerve origins?",
+    options: [
+      "Both nerves — thoracodorsal and lower subscapular — arise from the posterior cord of the brachial plexus",
+      "Both are innervated by the exact same nerve",
+      "Both nerves arise from the lateral cord",
+      "Neither nerve arises from the brachial plexus"
+    ],
+    correct: 0,
+    exp: "<strong>Both arise from the posterior cord — different nerves, same cord.</strong> Latissimus dorsi: thoracodorsal nerve, C6-C8. Teres major: lower subscapular nerve, C5-C6. Different specific nerves, but both trace back to the posterior cord of the brachial plexus — consistent with both being posterior compartment muscles."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. The Little Latissimus and its bigger partner — fully mapped, floor to medial lip. Max would call this the expected outcome. Antony would call it a power couple achievement."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching scene, then retake. Same actions, same groove — almost the whole picture is there."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific scenes for the muscles you missed and re-watch. Then retake immediately — re-watching and re-testing together is far more effective than either alone."; skull = "💀"; }
+  else { msg = "Re-watch the full video, focusing on the shared actions (ADd + MEd + EXt) as the thread connecting both muscles. Then retake this quiz — the pattern will click once the shared logic is clear."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
