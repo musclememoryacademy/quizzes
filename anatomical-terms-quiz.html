@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomical Terminology Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 0.95rem; color: #FFD700; margin-bottom: 0.35rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.5rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Anatomical Position &amp; Directional Terminology — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>Palms FORWARD · Medial = median · Ipsi = same, Contra = opposite</p>
+      <div class="sub">Sagittal (arrow) · Frontal (crown) · Transverse (horizontal slice)</div>
+      <p>Introvert = medial rotation · Extroverts = lateral rotation</p>
+      <div class="sub">Winged scapula = protraction failure · Rolled ankle = inversion injury</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: C A D B C D A B C A D B = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "Anatomical position",
+    q: "The anatomical position includes one detail almost everyone forgets. What is it, and why does it matter?",
+    options: [
+      "The feet must be exactly together, not shoulder-width apart — this ensures consistent leg measurements",
+      "The head must be tilted slightly forward — this standardizes cranial landmark descriptions",
+      "The palms must face forward — this fixes the forearm in a known, uncrossed position so terms like \"medial\" and \"lateral\" mean the same thing on every patient",
+      "The eyes must be closed — this removes visual bias when describing symmetry"
+    ],
+    correct: 2,
+    exp: "<strong>Palms forward.</strong> This fixes the forearm in a supinated, uncrossed position. Without this fixed reference, a word like \"medial\" in the forearm wouldn't mean the same thing every time — the anatomical position exists precisely so directional terms hold steady regardless of how a patient's body is actually positioned in the room."
+  },
+  {
+    tag: "Medial and median",
+    q: "What is the connection between the word \"medial\" and the median nerve's name?",
+    options: [
+      "They share the same root — median means \"middle,\" and the median nerve sits in the middle of the forearm, between the lateral and medial cords of the brachial plexus",
+      "They are unrelated words that happen to sound similar",
+      "\"Median\" is simply the Latin plural of \"medial\"",
+      "The median nerve is named after the median plane, a fourth anatomical plane"
+    ],
+    correct: 0,
+    exp: "<strong>Same root, same idea.</strong> A median strip runs down the middle of a highway. The median nerve sits in the middle of the forearm, formed from both the lateral and medial cords of the brachial plexus. The name isn't decoration — it's a direct statement of position."
+  },
+  {
+    tag: "Ipsilateral vs contralateral",
+    q: "A stroke affecting the right side of the brain classically produces weakness on the left side of the body. Reflexes are tested on the same side as the stimulus. What terms describe these two patterns?",
+    options: [
+      "Both are examples of medial patterns",
+      "Both are examples of contralateral patterns",
+      "The stroke pattern is ipsilateral; the reflex pattern is contralateral",
+      "The stroke pattern is contralateral; the reflex pattern is ipsilateral"
+    ],
+    correct: 3,
+    exp: "<strong>Stroke = contralateral. Reflexes = ipsilateral.</strong> Contralateral means opposite side — right brain, left-side weakness. Ipsilateral means same side — the reflex response occurs on the same side as the stimulus that triggered it. This distinction shows up constantly in clinical reasoning."
+  },
+  {
+    tag: "Proximal and distal",
+    q: "On the humerus, which landmarks are proximal and which are distal?",
+    options: [
+      "The trochlea and capitulum are proximal; the tubercles are distal",
+      "The intertubercular sulcus and the greater/lesser tubercles are proximal; the trochlea and capitulum are distal",
+      "All major humerus landmarks are considered proximal",
+      "Proximal and distal do not apply to a single bone, only to whole limbs"
+    ],
+    correct: 1,
+    exp: "<strong>Intertubercular sulcus and tubercles = proximal. Trochlea and capitulum = distal.</strong> Same bone, opposite ends. Proximal means closer to the trunk or point of attachment; distal means farther away. This pairing matters constantly once you're studying individual bones in detail."
+  },
+  {
+    tag: "Superficial and deep",
+    q: "How do the masseter and brachialis illustrate the superficial/deep distinction?",
+    options: [
+      "The masseter is entirely deep; brachialis is entirely superficial",
+      "Both muscles are purely superficial with no deep component",
+      "The masseter has a superficial head you can feel through the skin and a deep head beneath it; brachialis sits deep to biceps brachii, doing most of the actual work of elbow flexion while biceps gets the attention",
+      "Superficial and deep only apply to skin layers, not muscles"
+    ],
+    correct: 2,
+    exp: "<strong>Masseter: superficial and deep heads. Brachialis: deep to biceps.</strong> Superficial means closer to the surface; deep means farther from it, closer to the core. These terms describe layering — which structure sits on top of which — and this pair shows up constantly once you start looking for it."
+  },
+  {
+    tag: "The three planes",
+    q: "Which plane divides the body into left and right portions, and what is the mnemonic for it?",
+    options: [
+      "The frontal plane — picture a crown running ear to ear",
+      "The transverse plane — think of a chef slicing horizontally",
+      "The coronal plane — from the Latin word for crown",
+      "The sagittal plane — from the Latin word for arrow, like Sagittarius the archer, an arrow flying front to back splits you left and right"
+    ],
+    correct: 3,
+    exp: "<strong>The sagittal plane.</strong> Sagittal comes from the Latin word for arrow — like Sagittarius, the archer. An arrow flying straight through you, front to back, splits you into left and right portions. The frontal (coronal) plane splits front/back like a crown ear to ear; the transverse plane splits top/bottom like a horizontal slice."
+  },
+  {
+    tag: "Flexion and extension",
+    q: "Biceps brachii and triceps brachii are functional opposites at the elbow. Which terms describe their actions, and in which plane does this movement occur?",
+    options: [
+      "Biceps flexes (decreases the joint angle), triceps extends (increases the joint angle) — both occur in the sagittal plane",
+      "Biceps extends, triceps flexes — both occur in the frontal plane",
+      "Both muscles flex the elbow — there is no opposing action at this joint",
+      "Biceps flexes, triceps extends — both occur in the transverse plane"
+    ],
+    correct: 0,
+    exp: "<strong>Biceps flexes, triceps extends — sagittal plane.</strong> Flexion decreases the angle at a joint; extension increases it. This pair follows through nearly every muscle you'll study — functional opposites, defined before you learn a single other fact about either muscle."
+  },
+  {
+    tag: "Abduction and adduction",
+    q: "The middle deltoid and latissimus dorsi are functional opposites. Which terms apply, and in which plane?",
+    options: [
+      "Deltoid adducts, latissimus abducts — frontal plane",
+      "Middle deltoid abducts (moves the arm away from the midline), latissimus dorsi adducts (pulls it back toward the midline) — frontal plane",
+      "Both muscles abduct the arm — sagittal plane",
+      "Deltoid abducts, latissimus adducts — transverse plane"
+    ],
+    correct: 1,
+    exp: "<strong>Middle deltoid abducts, latissimus dorsi adducts — frontal plane.</strong> AB means away (like \"abnormal\"); AD means toward (like \"adding\" it back). Every pull-up is adduction, powered by exactly the muscle whose job is to adduct."
+  },
+  {
+    tag: "Medial vs lateral rotation",
+    q: "Subscapularis and the infraspinatus/teres minor pair perform opposite rotations. Which is which, and what plane does rotation occur in?",
+    options: [
+      "Subscapularis laterally rotates; infraspinatus/teres minor medially rotate — sagittal plane",
+      "All three muscles perform the same rotation — frontal plane",
+      "Subscapularis (the Introvert) medially/internally rotates; infraspinatus and teres minor (the Extroverts) laterally/externally rotate — transverse plane",
+      "Subscapularis medially rotates; infraspinatus/teres minor also medially rotate — transverse plane"
+    ],
+    correct: 2,
+    exp: "<strong>Subscapularis (the Introvert) rotates medially/internally. Infraspinatus and teres minor (the Extroverts) rotate laterally/externally. Transverse plane.</strong> The character names and the movements are the same idea — hidden, turned inward for the Introvert; out in the open, turned outward for the Extroverts."
+  },
+  {
+    tag: "Circumduction",
+    q: "What is circumduction, and is it a distinct fifth type of movement?",
+    options: [
+      "It is flexion, extension, abduction, and adduction combined in a continuous sequence, tracing a cone shape — not a fifth independent movement, but the other four performed together",
+      "It is a completely separate, fifth type of movement unrelated to flexion, extension, abduction, or adduction",
+      "It refers only to rotation of the forearm",
+      "It is another name for pronation"
+    ],
+    correct: 0,
+    exp: "<strong>Circumduction is the other four movements combined, not a fifth one.</strong> Combine flexion, extension, abduction, and adduction in a continuous circle and you get the cone-shaped movement a limb traces when you draw a large circle with your outstretched arm."
+  },
+  {
+    tag: "Winged scapula",
+    q: "How does the winged scapula connect to the vocabulary of protraction and retraction?",
+    options: [
+      "It results from excessive retraction of the scapula",
+      "It has no connection to protraction or retraction — it is purely a nerve conduction problem",
+      "It occurs when the scapula elevates instead of depressing",
+      "When the long thoracic nerve is damaged, serratus anterior — the muscle that protracts the scapula — fails, and the scapula loses that protraction, causing the medial border to lift away from the ribs"
+    ],
+    correct: 3,
+    exp: "<strong>Winged scapula is a protraction failure.</strong> Serratus anterior holds the scapula flat and forward against the ribcage — that's protraction. When the long thoracic nerve is damaged and serratus fails, the scapula loses that protraction and the medial border lifts away from the ribs. It's never just a nerve injury fact — it's the exact vocabulary in action."
+  },
+  {
+    tag: "Rolled ankle",
+    q: "The classic \"rolled ankle\" is described using which movement term, and what actually happens?",
+    options: [
+      "It is an eversion injury — the foot rolls outward past its limit",
+      "It is an inversion injury — the foot rolls inward past its limit, and the ligaments on the outside of the ankle take the damage",
+      "It is a dorsiflexion injury — the foot lifts up too far",
+      "It is a plantar flexion injury — the foot points down too far, like a gas pedal pressed too hard"
+    ],
+    correct: 1,
+    exp: "<strong>Inversion injury.</strong> The foot rolls inward — toward the midline — past its limit, and the ligaments on the outside of the ankle take the damage. When you hear \"lateral ankle sprain,\" you now know it happened because the foot inverted, by far the most common ankle injury."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. You now speak the language every other video on this channel assumes you already know. Max would call this the expected outcome."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching scene, then retake. This vocabulary underpins everything else — worth locking in fully."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific scenes for the terms you missed and re-watch. Then retake immediately — this video is meant to be a reference you return to."; skull = "💀"; }
+  else { msg = "Re-watch the full video. This is the one video every other video assumes you've already mastered — worth taking the time to get it solid before moving on to the muscles."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
