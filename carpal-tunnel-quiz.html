@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carpal Tunnel Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 0.95rem; color: #FFD700; margin-bottom: 0.35rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.5rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>Carpal Tunnel — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>Sailors Trade, Pirates Hoard</p>
+      <div class="sub">Scaphoid + Trapezium (lateral) — Pisiform + Hook of hamate (medial)</div>
+      <p>TIMING is everything for the median nerve — Thumb, Index, Middle, half of rING</p>
+      <div class="sub">Ulnar's territory is LITTLE-R — the medial half of the ring finger, plus the LITTLE finger</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: B D A C B A D C A D B C = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "The cold open",
+    q: "How many total structures pass through the carpal tunnel, and what are they?",
+    options: [
+      "8 structures — 8 tendons only, no nerve",
+      "10 structures — 9 flexor tendons plus the median nerve",
+      "11 structures — 9 tendons, the median nerve, and the ulnar nerve",
+      "9 structures — 8 tendons plus the median nerve"
+    ],
+    correct: 1,
+    exp: "<strong>Ten structures — derived, not memorised.</strong> Nine flexor tendons plus the median nerve. By the end of the video you can produce this number yourself from first principles, rather than recalling it as a fact."
+  },
+  {
+    tag: "The boundaries",
+    q: "What forms the floor and walls versus the roof of the carpal tunnel?",
+    options: [
+      "Floor/walls: flexor retinaculum; Roof: carpal bones",
+      "Floor/walls: skin and fascia; Roof: carpal bones",
+      "Floor/walls: flexor tendons; Roof: median nerve",
+      "Floor/walls: carpal bones (concave arch); Roof: flexor retinaculum"
+    ],
+    correct: 3,
+    exp: "<strong>Carpal bones below, ligament above.</strong> The carpal bones form a concave arch — the floor and walls. The flexor retinaculum bridges across the top as the roof, and critically, it does not stretch."
+  },
+  {
+    tag: "The four bony anchor points",
+    q: "The mnemonic \"Sailors Trade, Pirates Hoard\" identifies which four bony anchor points of the flexor retinaculum?",
+    options: [
+      "Scaphoid + Trapezium (lateral), Pisiform + Hook of hamate (medial)",
+      "Radius + Ulna (proximal), Capitate + Hamate (distal)",
+      "Trapezium + Trapezoid (lateral), Triquetrum + Pisiform (medial)",
+      "Scaphoid + Lunate (lateral), Hamate + Capitate (medial)"
+    ],
+    correct: 0,
+    exp: "<strong>Sailors Trade — Scaphoid, Trapezium (thumb side). Pirates Hoard — Pisiform, Hook of hamate (little-finger side).</strong> Pirates hoard treasure, and pirates have hooks — the imagery is absurd, but the pairing is correct."
+  },
+  {
+    tag: "Deriving the nine tendons",
+    q: "How do you derive that there are 9 flexor tendons in the carpal tunnel, without memorising the number directly?",
+    options: [
+      "5 fingers x 2 tendons each = 10, minus 1 for the thumb = 9",
+      "3 tendons per finger x 3 fingers = 9",
+      "4 fingers x 2 tendons each (FDS + FDP) = 8, plus 1 for the thumb (FPL) = 9",
+      "9 is simply memorised; there is no logical derivation"
+    ],
+    correct: 2,
+    exp: "<strong>Eight, plus one.</strong> Each of the four fingers needs two tendons to bend independently at both joints (FDS + FDP). The thumb only has one joint worth bending this way, so it needs just one tendon (FPL). 8 + 1 = 9."
+  },
+  {
+    tag: "The median nerve's position",
+    q: "Why is the median nerve the structure most vulnerable to compression in the carpal tunnel?",
+    options: [
+      "It is the largest structure in the tunnel",
+      "It sits most superficially, closest to the unyielding flexor retinaculum, and nerve tissue is more pressure-sensitive than tendon",
+      "It is the only structure that lacks a protective sheath",
+      "It runs through the tightest section of the tunnel near the pisiform"
+    ],
+    correct: 1,
+    exp: "<strong>Nine tough tendons can tolerate a crowded room. One soft nerve, pressed against an immovable ceiling, cannot.</strong> The median nerve's superficial position means it takes the brunt of any swelling first."
+  },
+  {
+    tag: "The median nerve's territory",
+    q: "The mnemonic \"TIMING is everything for the median nerve\" describes which sensory territory?",
+    options: [
+      "Thumb, index finger, middle finger, and the lateral half of the ring finger",
+      "The entire palm, including all five digits",
+      "Only the thumb and index finger",
+      "The dorsal (back) surface of the hand"
+    ],
+    correct: 0,
+    exp: "<strong>Thumb, Index, Middle, half of rING.</strong> That distribution is exactly why carpal tunnel syndrome produces numbness in this specific pattern — the median nerve only serves this territory."
+  },
+  {
+    tag: "The rest of the hand",
+    q: "According to the video, whatever the median nerve's territory does not cover on the palm is supplied by which nerve, and where?",
+    options: [
+      "The radial nerve, covering the thumb's dorsal surface",
+      "The musculocutaneous nerve, covering the forearm",
+      "The median nerve's own deep branch, covering the wrist",
+      "The ulnar nerve, covering the medial half of the ring finger and the entire little finger"
+    ],
+    correct: 3,
+    exp: "<strong>Ulnar's territory is LITTLE-R.</strong> The medial half of the ring finger plus the little finger — a smaller share of the hand than median's, but between the two of them, the whole palm is accounted for."
+  },
+  {
+    tag: "What doesn't pass through — FCR",
+    q: "Why doesn't flexor carpi radialis count among the structures compressed in carpal tunnel syndrome?",
+    options: [
+      "It does not pass anywhere near the flexor retinaculum",
+      "It is not actually a tendon",
+      "It travels through the retinaculum in its own separate compartment, not the main tunnel",
+      "It only exists in a minority of the population"
+    ],
+    correct: 2,
+    exp: "<strong>Same ligament, private room.</strong> FCR does pass through the flexor retinaculum region, but in a groove within the trapezium — its own dedicated compartment, never mixing with the main tunnel's nine tendons and one nerve."
+  },
+  {
+    tag: "What doesn't pass through — PL and FCU",
+    q: "What do palmaris longus and flexor carpi ulnaris have in common regarding the carpal tunnel?",
+    options: [
+      "Both remain entirely superficial to the flexor retinaculum and never enter the tunnel",
+      "Both pass directly through the centre of the main tunnel",
+      "Both share a single compartment with flexor carpi radialis",
+      "Both are absent in most of the population"
+    ],
+    correct: 0,
+    exp: "<strong>Over the roof, not through the tunnel.</strong> Both tendons travel entirely superficial to the flexor retinaculum, which is exactly why neither one is ever at risk of compression in carpal tunnel syndrome."
+  },
+  {
+    tag: "Carpal tunnel syndrome",
+    q: "What is the fundamental mechanism behind carpal tunnel syndrome?",
+    options: [
+      "The median nerve spontaneously degenerates with age",
+      "The flexor retinaculum thins over time, exposing the nerve",
+      "The carpal bones shift position, pinching the tendons",
+      "Swelling within a fixed-size space compresses the most vulnerable structure — the median nerve"
+    ],
+    correct: 3,
+    exp: "<strong>A fixed-size room with an unyielding ceiling.</strong> Repetitive strain, pregnancy, hypothyroidism, rheumatoid arthritis, or fracture can all add swelling to the tunnel — and the median nerve has nowhere to go."
+  },
+  {
+    tag: "Phalen's and Tinel's",
+    q: "What do Phalen's test and Tinel's sign have in common?",
+    options: [
+      "Both require imaging equipment to perform",
+      "Both provoke median nerve symptoms through a different physical action — sustained flexion versus tapping",
+      "Both are used only to rule out ulnar nerve involvement",
+      "Both test grip strength rather than nerve compression"
+    ],
+    correct: 1,
+    exp: "<strong>Flex it, or tap it.</strong> Phalen's test uses sustained wrist flexion; Tinel's sign uses tapping directly over the nerve. Two different physical actions, asking the same nerve the same question."
+  },
+  {
+    tag: "Putting it together",
+    q: "A patient reports numbness in the thumb, index, and middle fingers, but the little finger feels completely normal. What does this pattern suggest?",
+    options: [
+      "Ulnar nerve compression, since the little finger is always affected first",
+      "A non-specific finding with no localising value",
+      "Median nerve compression, consistent with carpal tunnel syndrome",
+      "Radial nerve compression at the wrist"
+    ],
+    correct: 2,
+    exp: "<strong>Exactly the territory already mapped.</strong> A pattern that spares the little finger and the medial ring finger while affecting the thumb, index, and middle fingers points straight to the median nerve — and straight to carpal tunnel syndrome."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. Ten structures, both mnemonics, the full clinical picture — locked in. Max would call this the expected outcome."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching structure, then retake. This distinction underpins how you'll actually diagnose this condition."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific sections for the terms you missed and re-watch. Then retake immediately — the whole video builds from just four ideas."; skull = "💀"; }
+  else { msg = "Re-watch the full video. Ten structures and two mnemonics is genuinely manageable once the logic clicks — worth taking the time to rebuild it from scratch."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
