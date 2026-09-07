@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humerus Landmarks Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 0.95rem; color: #FFD700; margin-bottom: 0.35rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.5rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>The Humerus — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>3 landmarks, 3 nerves — every time</p>
+      <div class="sub">Surgical neck → axillary | Radial groove → radial | Medial epicondyle → ulnar</div>
+      <p>Brachioradialis breaks the rule</p>
+      <div class="sub">Extensor compartment, radial nerve — but flexes the elbow anyway</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: B D A C B A D C A D B C = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "Shape: the three regions",
+    q: "What are the three regions the humerus is divided into for the purposes of this video?",
+    options: [
+      "Head, neck, shaft",
+      "Proximal end, shaft, distal end",
+      "Superior, middle, inferior",
+      "Anterior, posterior, lateral"
+    ],
+    correct: 1,
+    exp: "<strong>Proximal end, shaft, distal end.</strong> Learn these three terms first — every other landmark in the video locates itself against one of them."
+  },
+  {
+    tag: "The greater tubercle",
+    q: "Three of the four rotator cuff muscles (SITS) attach to the greater tubercle, stacked in order. Which one breaks off and attaches elsewhere?",
+    options: [
+      "Supraspinatus",
+      "Infraspinatus",
+      "Teres minor",
+      "Subscapularis"
+    ],
+    correct: 3,
+    exp: "<strong>Subscapularis breaks off entirely.</strong> Supraspinatus, infraspinatus, and teres minor stack on the greater tubercle in that exact order — but subscapularis swings around to the front and takes the lesser tubercle for itself."
+  },
+  {
+    tag: "The intertubercular sulcus",
+    q: "Four tendons occupy the intertubercular sulcus, but only three actually attach to the humerus there. Which one merely passes through on its way to a different attachment point?",
+    options: [
+      "Biceps brachii's long head",
+      "Pectoralis major",
+      "Latissimus dorsi",
+      "Teres major"
+    ],
+    correct: 0,
+    exp: "<strong>Biceps brachii's long head just passes through.</strong> Pec major, lats, and teres major all genuinely insert on the lips and floor of the groove — but biceps' real attachment is the supraglenoid tubercle of the scapula."
+  },
+  {
+    tag: "The surgical neck",
+    q: "Why does the surgical neck carry more clinical significance than the anatomical neck?",
+    options: [
+      "It is closer to the shoulder joint",
+      "It is where the biceps tendon runs",
+      "It is the most common site of proximal humeral fracture, with the axillary nerve wrapped directly around it",
+      "It has no clinical significance; the anatomical neck is more important"
+    ],
+    correct: 2,
+    exp: "<strong>Surgical neck, axillary nerve — nerve injury #1 of 3.</strong> The axillary nerve and posterior circumflex humeral artery wrap around this exact spot, so a fracture here puts both structures directly at risk."
+  },
+  {
+    tag: "The radial groove",
+    q: "What is \"Saturday night palsy,\" and how does it relate to the radial groove?",
+    options: [
+      "A hereditary condition affecting the radial nerve",
+      "Prolonged pressure on the radial groove (such as sleeping with an arm draped over a chair) compressing the radial nerve, causing wrist drop",
+      "A fracture of the greater tubercle",
+      "An injury exclusive to athletes"
+    ],
+    correct: 1,
+    exp: "<strong>Radial groove, radial nerve — nerve injury #2 of 3.</strong> The radial nerve runs directly against bone in this groove, so sustained external pressure (or a midshaft fracture) compresses it, producing wrist drop."
+  },
+  {
+    tag: "The supracondylar ridge",
+    q: "Which muscle originates from the lateral supracondylar ridge of the humerus?",
+    options: [
+      "Brachioradialis",
+      "Biceps brachii",
+      "Triceps brachii",
+      "Pronator teres"
+    ],
+    correct: 0,
+    exp: "<strong>Brachioradialis.</strong> The lateral supracondylar ridge is its origin, along with part of extensor carpi radialis longus lower down."
+  },
+  {
+    tag: "Brachioradialis, the rule-breaker",
+    q: "Why is brachioradialis described as \"breaking the rule\" its neighbouring muscles follow?",
+    options: [
+      "It has no nerve supply",
+      "It originates from the medial epicondyle instead of the lateral",
+      "It is the only muscle that crosses two joints",
+      "It sits in the extensor compartment and is innervated by the radial nerve, yet its actual action is flexing the elbow"
+    ],
+    correct: 3,
+    exp: "<strong>Compartment says extensor. Nerve says extensor. Action says flexor.</strong> Brachioradialis is the one muscle in this region that doesn't follow the pattern everything around it follows."
+  },
+  {
+    tag: "The medial epicondyle",
+    q: "Which of the following is NOT one of the five muscles originating from the common flexor origin at the medial epicondyle?",
+    options: [
+      "Pronator teres",
+      "Extensor carpi radialis brevis",
+      "Palmaris longus",
+      "Flexor carpi ulnaris"
+    ],
+    correct: 1,
+    exp: "<strong>Extensor carpi radialis brevis belongs on the lateral side.</strong> The medial epicondyle's five flexors are pronator teres, flexor carpi radialis, palmaris longus, flexor carpi ulnaris, and flexor digitorum superficialis."
+  },
+  {
+    tag: "The lateral epicondyle",
+    q: "Inflammation at the common extensor origin on the lateral epicondyle is known by what common clinical name?",
+    options: [
+      "Tennis elbow",
+      "Golfer's elbow",
+      "Funny bone syndrome",
+      "Saturday night palsy"
+    ],
+    correct: 0,
+    exp: "<strong>Tennis elbow is lateral epicondylitis.</strong> Extensors live laterally — golfer's elbow (medial epicondylitis) is the flexor-side equivalent."
+  },
+  {
+    tag: "The ulnar nerve",
+    q: "Why does striking the \"funny bone\" produce a tingling sensation down to the ring and little finger?",
+    options: [
+      "It triggers the radial nerve at the surgical neck",
+      "It compresses the axillary nerve",
+      "It fractures the medial epicondyle",
+      "The ulnar nerve runs directly behind the medial epicondyle, unprotected by muscle at that exact point"
+    ],
+    correct: 3,
+    exp: "<strong>Medial epicondyle, ulnar nerve — nerve injury #3 of 3.</strong> The \"funny bone\" isn't funny at all — it's simply the one place this nerve has nowhere to hide."
+  },
+  {
+    tag: "Capitulum and trochlea",
+    q: "What do the Latin/Greek origins of \"capitulum\" and \"trochlea\" reveal about their function?",
+    options: [
+      "Capitulum means \"pulley,\" trochlea means \"little head\" — reversed from what you'd expect",
+      "Capitulum means \"little head\" (small, round, meets the radius), trochlea means \"pulley\" (guides the ulna's hinge motion)",
+      "Both words mean the same thing: \"joint surface\"",
+      "Neither name has any functional significance"
+    ],
+    correct: 1,
+    exp: "<strong>The names describe the job.</strong> Capitulum — little head — is small and round, meeting the round head of the radius. Trochlea — pulley — works exactly like one, guiding the ulna through a pure hinge motion."
+  },
+  {
+    tag: "The three fossae",
+    q: "Why do two small fossae sit anteriorly on the distal humerus while only one larger fossa sits posteriorly?",
+    options: [
+      "The anterior fossae are vestigial and serve no purpose",
+      "It's a random anatomical variation with no functional explanation",
+      "Flexion needs two landmarks in front to receive the coronoid process and radial head; extension needs one larger landmark behind for the olecranon",
+      "The posterior fossa is actually larger to accommodate the triceps tendon"
+    ],
+    correct: 2,
+    exp: "<strong>The logic runs in the direction the joint moves.</strong> Two small dimples in front give the coronoid process and radial head somewhere to tuck into during flexion. One large dimple in back does the same job for the olecranon during extension."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. Every landmark, every nerve, every named muscle — locked in. Max would call this the expected outcome."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching landmark, then retake. This vocabulary underpins how you'll read a fracture pattern for the rest of your career."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific landmarks for the terms you missed and re-watch. Then retake immediately — one bone, three nerves, and a clear logic running through all of it."; skull = "💀"; }
+  else { msg = "Re-watch the full video. One bone, one throughline — three landmarks, three nerve injuries. Worth taking the time to rebuild that thread before moving on."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
