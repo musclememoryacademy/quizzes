@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forearm Extensors Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 0.95rem; color: #FFD700; margin-bottom: 0.35rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.5rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>The Forearm Extensors — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>Bridges Last Better Daily Maintenance Upkeep Annually</p>
+      <div class="sub">The 7 superficial extensors, in order — Bridges + Last are the 2 ridge muscles</div>
+      <p>LAB IS DUMB</p>
+      <div class="sub">DUMB = 4 epicondyle muscles, IS = Indicis + Supinator, LAB = the 3 thumb muscles — all 9 share the PIN</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: B D A C B A D C A D B C = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "The compartment overview",
+    q: "How many total muscles make up the forearm extensor compartment covered in this video, and how many layers are they arranged in?",
+    options: [
+      "Seven muscles, one layer",
+      "Twelve muscles, two layers",
+      "Nine muscles, three layers",
+      "Ten muscles, two layers"
+    ],
+    correct: 1,
+    exp: "<strong>Twelve muscles, two layers.</strong> Seven superficial muscles (the \"Bridges Last Better...\" mnemonic) plus five deep muscles — supinator, the three thumb muscles, and extensor indicis."
+  },
+  {
+    tag: "The master mnemonic",
+    q: "In \"Bridges Last Better Daily Maintenance Upkeep Annually,\" which muscle does \"Upkeep\" represent?",
+    options: [
+      "Extensor digitorum",
+      "Extensor digiti minimi",
+      "Anconeus",
+      "Extensor carpi ulnaris"
+    ],
+    correct: 3,
+    exp: "<strong>Upkeep — Extensor carpi Ulnaris.</strong> Two heads, humeral and ulnar, extending and ulnarly deviating the wrist."
+  },
+  {
+    tag: "Brachioradialis, the troublemaker",
+    q: "Why is brachioradialis described as a \"troublemaker\" among the extensor muscles?",
+    options: [
+      "It sits in the extensor compartment but its actual action is flexing the elbow",
+      "It has no nerve supply",
+      "It is the only muscle absent in a significant portion of the population",
+      "It never actually attaches to the forearm"
+    ],
+    correct: 0,
+    exp: "<strong>Extensor compartment, flexor action.</strong> Brachioradialis keeps company with extensor muscles but its real job is flexing the elbow, most effectively in mid-pronation."
+  },
+  {
+    tag: "Two exceptions, twice over",
+    q: "What TWO separate ways do brachioradialis and extensor carpi radialis longus break the pattern followed by the other extensor muscles?",
+    options: [
+      "They are the only two muscles that cross two joints",
+      "They are the only two muscles innervated by the ulnar nerve",
+      "They originate from the supracondylar ridge instead of the epicondyle, AND they're supplied by the radial nerve before it splits into the posterior interosseous nerve",
+      "They are the only two muscles that flex rather than extend"
+    ],
+    correct: 2,
+    exp: "<strong>Same two muscles, two exceptions.</strong> Higher origin (ridge, not epicondyle) and earlier nerve supply (before the PIN branch point) — Bridges and Last, breaking both rules at once."
+  },
+  {
+    tag: "ECRB and extensor digitorum",
+    q: "Once the bone origin shifts from the ridge to the epicondyle, which nerve supplies extensor carpi radialis brevis and extensor digitorum?",
+    options: [
+      "The radial nerve, before any branching occurs",
+      "The posterior interosseous nerve, the deep terminal branch of the radial nerve",
+      "The median nerve",
+      "The ulnar nerve"
+    ],
+    correct: 1,
+    exp: "<strong>The split has happened.</strong> From here on, the posterior interosseous nerve supplies almost everything in the compartment."
+  },
+  {
+    tag: "The lateral-to-medial pattern",
+    q: "Across the five superficial extensor muscles covered earlier in the video, what pattern do their origins and insertions share?",
+    options: [
+      "Both run in the same lateral-to-medial direction, in the same order the muscles are taught",
+      "Origins run lateral to medial, but insertions run the opposite direction",
+      "There is no consistent spatial pattern between them",
+      "All five insert on the exact same bone"
+    ],
+    correct: 0,
+    exp: "<strong>Styloid, 2nd, 3rd, fingers, 5th.</strong> Origins and insertions both march lateral to medial, in the exact order the muscles were introduced."
+  },
+  {
+    tag: "Anconeus",
+    q: "What is anconeus's primary role in the extensor compartment?",
+    options: [
+      "It is the primary wrist extensor",
+      "It flexes the thumb",
+      "It supplies the entire compartment's nerve innervation",
+      "It assists triceps in elbow extension and stabilizes the elbow joint during forearm rotation"
+    ],
+    correct: 3,
+    exp: "<strong>The tune-up muscle.</strong> Small, easy to overlook, doing a job that's more about steadying the joint than producing forceful movement."
+  },
+  {
+    tag: "The arcade of Frohse",
+    q: "What is significant about the posterior interosseous nerve's relationship with supinator?",
+    options: [
+      "The nerve never reaches supinator at all",
+      "Supinator is the only muscle in the compartment with no nerve supply",
+      "The nerve passes beneath the arcade of Frohse and directly through the muscle itself, between its two layers",
+      "The nerve only touches the outer surface of supinator"
+    ],
+    correct: 2,
+    exp: "<strong>A genuine anatomical passageway, not just adjacency.</strong> Compression here produces motor weakness without sensory loss, since the nerve has already given off its sensory fibres by this point."
+  },
+  {
+    tag: "The thumb muscles",
+    q: "What \"purely coincidental but useful\" pattern do abductor pollicis longus, extensor pollicis brevis, and extensor pollicis longus share?",
+    options: [
+      "Their base-to-tip insertion order (metacarpal, proximal phalanx, distal phalanx) matches alphabetical order",
+      "They all insert on the exact same bone",
+      "They are all innervated by different nerves",
+      "They all originate from the humerus"
+    ],
+    correct: 0,
+    exp: "<strong>A, B, L.</strong> Abductor, Brevis, Longus — the same order as their insertions travel from the base of the thumb to its tip."
+  },
+  {
+    tag: "Extensor indicis",
+    q: "What role does extensor indicis play, and which other muscle does this mirror?",
+    options: [
+      "It flexes the thumb, mirroring flexor pollicis longus",
+      "It extends the wrist, mirroring extensor carpi ulnaris",
+      "It stabilizes the elbow, mirroring anconeus",
+      "It gives the index finger independent extension, mirroring the role extensor digiti minimi plays for the little finger"
+    ],
+    correct: 3,
+    exp: "<strong>The same logic, the opposite finger.</strong> Extensor digitorum can extend the index finger too, but extensor indicis means you can extend it alone."
+  },
+  {
+    tag: "LAB IS DUMB",
+    q: "In the mnemonic \"LAB IS DUMB\" for the nine posterior-interosseous-nerve-supplied muscles, what does \"IS\" stand for?",
+    options: [
+      "Interosseous, Supinator",
+      "Indicis, Supinator",
+      "Insertion, Superficial",
+      "Index, Sensory"
+    ],
+    correct: 1,
+    exp: "<strong>Indicis, Supinator.</strong> DUMB covers the four epicondyle muscles, LAB covers the three thumb muscles, and IS bridges the two deep-layer outliers."
+  },
+  {
+    tag: "The overall pattern",
+    q: "What is the overall nerve supply pattern of the entire twelve-muscle extensor compartment?",
+    options: [
+      "Each muscle has its own unique nerve supply",
+      "Half the muscles are median nerve, half are radial nerve",
+      "One dominant rule (posterior interosseous nerve) with exactly one shared exception (brachioradialis and ECRL, supplied by the radial nerve proper)",
+      "All twelve muscles share the exact same nerve with zero exceptions"
+    ],
+    correct: 2,
+    exp: "<strong>One rule, one exception, expressed twice.</strong> Unlike the flexor compartment's full-and-half exception split between two nerves, the extensor compartment stays under the radial nerve throughout — the only variable is how early it reaches each muscle."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. Twelve muscles, both mnemonics, the ridge exception, and the arcade of Frohse — all locked in. Max would call this the expected outcome."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching muscle, then retake. This nerve-supply logic underpins how you'll read a radial nerve injury for the rest of your career."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific muscles for the terms you missed and re-watch. Then retake immediately — twelve muscles is manageable once the two layers and one exception click."; skull = "💀"; }
+  else { msg = "Re-watch the full video. One rule, one exception, expressed twice — worth taking the time to rebuild that structure before moving on."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
