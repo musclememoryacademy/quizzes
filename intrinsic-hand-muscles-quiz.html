@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intrinsic Hand Muscles Quiz — Muscle Memory Academy</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #0a0f1e; color: #e8e0d0; min-height: 100vh; }
+  .header { background: #002244; border-bottom: 3px solid #FFD700; padding: 1.5rem 2rem; text-align: center; }
+  .header-skull { font-size: 2rem; margin-bottom: 0.25rem; }
+  .header h1 { font-size: 1.1rem; font-weight: 700; color: #FFD700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .header p { font-size: 0.8rem; color: #a0b4cc; font-style: italic; }
+  .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .progress-bar { background: #1a2a3a; border-radius: 99px; height: 6px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #FFD700; border-radius: 99px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: #6a84a0; text-align: right; margin-top: -1.4rem; margin-bottom: 1.6rem; font-family: Arial, sans-serif; }
+  .question-card { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+  .question-tag { font-size: 0.7rem; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; margin-bottom: 0.75rem; }
+  .question-text { font-size: 1.1rem; line-height: 1.6; color: #e8e0d0; margin-bottom: 1.5rem; }
+  .options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option { background: #0a1420; border: 1px solid #1e3050; border-radius: 8px; padding: 0.85rem 1.1rem; cursor: pointer; display: flex; align-items: flex-start; gap: 0.75rem; transition: border-color 0.15s, background 0.15s; font-size: 0.95rem; line-height: 1.5; color: #c8d8e8; text-align: left; width: 100%; font-family: Georgia, serif; }
+  .option:hover:not(.disabled) { border-color: #FFD700; background: #111e2e; }
+  .option.correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.wrong { border-color: #e53935; background: #200a0a; color: #e8a0a0; }
+  .option.reveal-correct { border-color: #4caf50; background: #0a2010; color: #a8e0a8; }
+  .option.disabled { cursor: default; }
+  .option-letter { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1e3050; font-size: 0.75rem; font-family: Arial, sans-serif; font-weight: 700; color: #6a84a0; flex-shrink: 0; margin-top: 1px; transition: background 0.15s, color 0.15s; }
+  .option.correct .option-letter { background: #4caf50; color: #fff; }
+  .option.wrong .option-letter { background: #e53935; color: #fff; }
+  .option.reveal-correct .option-letter { background: #4caf50; color: #fff; }
+  .option.selected:not(.correct):not(.wrong) .option-letter { background: #FFD700; color: #002244; }
+  .explanation { display: none; margin-top: 1rem; padding: 1rem 1.1rem; background: #0a1c10; border-left: 3px solid #4caf50; border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.6; color: #a8d8a8; font-family: Arial, sans-serif; }
+  .explanation.wrong-exp { background: #1c0a0a; border-left-color: #e53935; color: #e8a0a0; }
+  .explanation strong { font-family: Georgia, serif; font-weight: normal; color: #FFD700; }
+  .nav { display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1rem; }
+  .btn { background: #002244; border: 1px solid #FFD700; color: #FFD700; padding: 0.65rem 1.4rem; border-radius: 8px; font-size: 0.9rem; font-family: Georgia, serif; cursor: pointer; transition: background 0.15s; letter-spacing: 0.03em; }
+  .btn:hover { background: #003366; }
+  .btn:disabled { opacity: 0.35; cursor: default; }
+  .btn-primary { background: #FFD700; color: #002244; font-weight: 700; }
+  .btn-primary:hover { background: #ffe033; }
+  .results { display: none; text-align: center; padding: 2rem 0; }
+  .results-skull { font-size: 3rem; margin-bottom: 1rem; }
+  .results h2 { font-size: 1.5rem; color: #FFD700; margin-bottom: 0.5rem; }
+  .score-display { font-size: 3.5rem; font-weight: 700; color: #FFD700; margin: 1rem 0; }
+  .score-label { font-size: 0.9rem; color: #6a84a0; font-family: Arial, sans-serif; margin-bottom: 1.5rem; }
+  .score-msg { font-size: 1rem; color: #c8d8e8; line-height: 1.7; max-width: 500px; margin: 0 auto 2rem; font-family: Arial, sans-serif; }
+  .mnemonic-reminder { background: #002244; border: 2px solid #FFD700; border-radius: 12px; padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+  .mnemonic-reminder p { font-size: 0.95rem; color: #FFD700; margin-bottom: 0.35rem; text-align: center; }
+  .mnemonic-reminder .sub { font-size: 0.75rem; color: #a0b4cc; font-family: Arial, sans-serif; text-align: center; margin-bottom: 0.5rem; }
+  .result-breakdown { background: #0e1826; border: 1px solid #1e3050; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: left; }
+  .result-breakdown h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFD700; font-family: Arial, sans-serif; margin-bottom: 1rem; }
+  .result-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1e3050; font-size: 0.85rem; font-family: Arial, sans-serif; line-height: 1.5; }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .result-q { color: #c8d8e8; flex: 1; }
+  .result-a { color: #6a84a0; font-size: 0.8rem; margin-top: 2px; }
+  .result-a.correct-a { color: #4caf50; }
+  .footer-note { font-size: 0.78rem; color: #3a5060; font-family: Arial, sans-serif; text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #1e3050; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-skull">💀</div>
+  <h1>Muscle Memory Academy</h1>
+  <p>The Intrinsic Muscles of the Hand — Retrieval Quiz</p>
+</div>
+<div class="container">
+  <div id="quiz-section">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">Question 1 of 12</div>
+    <div class="question-card">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="btn-prev" onclick="prevQ()" disabled>← Previous</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Next →</button>
+    </div>
+  </div>
+  <div class="results" id="results-section">
+    <div class="results-skull" id="results-skull">💀</div>
+    <h2>Quiz complete</h2>
+    <div class="score-display" id="final-score"></div>
+    <div class="score-label" id="score-label"></div>
+    <div class="score-msg" id="score-msg"></div>
+    <div class="mnemonic-reminder">
+      <p>O-A-F = Opponens, Abductor, Flexor</p>
+      <div class="sub">Both Jack's hill AND Jill's hill spell it — same 3-muscle structure, same acronym, same reason they're both oafs</div>
+      <p>LOAF, and the crust gets cut off for a reason</p>
+      <div class="sub">L and F (lateral lumbricals, flexor pollicis brevis) carry partial ulnar contribution — only O and A are 100% pure median</div>
+    </div>
+    <div class="result-breakdown">
+      <h3>Question by question</h3>
+      <div id="result-rows"></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="margin-top:1rem;">Retake quiz</button>
+  </div>
+  <div class="footer-note">
+    Muscle Memory Academy &mdash; Where anatomy sticks.<br>
+    Complete this quiz within an hour of watching the video for best retention.
+  </div>
+</div>
+<script>
+// Answer distribution: B D A C B A D C A D B C = A×3 B×3 C×3 D×3, no consecutive repeats
+const questions = [
+  {
+    tag: "The three regions",
+    q: "How many total intrinsic muscles does the hand have, and how are they divided?",
+    options: [
+      "20 muscles, divided into two regions",
+      "19 muscles, divided into three regions: Jack's hill, Jill's hill, and the pail",
+      "19 muscles, divided into two regions",
+      "20 muscles, divided into three regions"
+    ],
+    correct: 1,
+    exp: "<strong>Three regions, one hand.</strong> Jack's hill (thenar), Jill's hill (hypothenar), and the pail sitting between them — together accounting for all nineteen intrinsic muscles."
+  },
+  {
+    tag: "Jack's hill",
+    q: "What does the OAF acronym stand for on Jack's hill (the thenar eminence)?",
+    options: [
+      "Origin, Action, Function",
+      "Abductor, Brevis, Opponens",
+      "Only Active Flexors",
+      "Opponens, Abductor, Flexor (pollicis brevis)"
+    ],
+    correct: 3,
+    exp: "<strong>Jack isn't clumsy because the rhyme says so — his own hill spells it out.</strong> Opponens, Abductor, Flexor: O-A-F."
+  },
+  {
+    tag: "Jill's hill",
+    q: "What is true about Jill's hill (the hypothenar eminence)?",
+    options: [
+      "It shares the exact same OAF structure as Jack's hill — opponens, abductor, and flexor digiti minimi brevis",
+      "It has four muscles instead of three",
+      "It contains the adductor pollicis",
+      "It is innervated by the median nerve"
+    ],
+    correct: 0,
+    exp: "<strong>Same word, same reason she comes tumbling down right after him.</strong> Jill's hill mirrors Jack's exactly — same 3-muscle structure, same O-A-F acronym."
+  },
+  {
+    tag: "The pail",
+    q: "What does the PAIL acronym stand for?",
+    options: [
+      "Pronator, Abductor, Interossei, Lumbricals",
+      "Palmar, Abductor, Index, Lateral",
+      "Palmaris brevis, Adductor pollicis, Interossei, Lumbricals",
+      "Palmaris, Adductor, Indicis, Longus"
+    ],
+    correct: 2,
+    exp: "<strong>The exact thing the rhyme sends them up the hill to fetch.</strong> Thirteen muscles, living in the mid-palm, belonging to neither eminence."
+  },
+  {
+    tag: "Palmaris brevis",
+    q: "What makes palmaris brevis unique among all the intrinsic hand muscles?",
+    options: [
+      "It is the only muscle with two heads",
+      "It inserts into skin rather than bone",
+      "It is the only muscle innervated by the median nerve",
+      "It has no origin point"
+    ],
+    correct: 1,
+    exp: "<strong>The only muscle in the pail that touches the surface rather than the depths.</strong> It wrinkles hypothenar skin and deepens the palm's hollow — a genuinely strange job for a muscle."
+  },
+  {
+    tag: "Adductor pollicis",
+    q: "Why does adductor pollicis belong to the pail rather than Jack's hill, despite sitting in thumb territory?",
+    options: [
+      "It is innervated by the ulnar nerve, not the median nerve",
+      "It does not actually attach to the thumb at all",
+      "It originates from the hypothenar eminence",
+      "It has no functional connection to the thumb"
+    ],
+    correct: 0,
+    exp: "<strong>Sits on Jack's hill, lives in the pail.</strong> It looks like a fourth member of his group, but it answers to Jill's nerve instead."
+  },
+  {
+    tag: "The interossei",
+    q: "What does the DAB/PAD mnemonic help you remember about the interossei?",
+    options: [
+      "Which bones they originate from",
+      "Their nerve supply",
+      "How many muscles exist in each row",
+      "Dorsal interossei ABduct, Palmar interossei ADduct"
+    ],
+    correct: 3,
+    exp: "<strong>Seven muscles, one simple rule.</strong> DAB and PAD tell you which direction each row pulls the fingers, every time."
+  },
+  {
+    tag: "The lumbricals",
+    q: "What does the word \"lumbrical\" literally mean, and what shape does the lumbrical action form in the finger?",
+    options: [
+      "\"Finger-like,\" forming a V shape",
+      "\"Claw-like,\" forming a C shape",
+      "\"Worm-like,\" forming an L shape (flexing the MCP while extending the IP joints)",
+      "\"Hook-like,\" forming an S shape"
+    ],
+    correct: 2,
+    exp: "<strong>Latin for worm-like — and honestly, look at it, it IS a worm.</strong> Bend the base, straighten the tip: an L, exactly where the muscle's name starts."
+  },
+  {
+    tag: "Lumbricals and nerve supply",
+    q: "How does the nerve supply split among the four lumbricals?",
+    options: [
+      "Lateral two belong to Jack (median), medial two belong to the pail (ulnar)",
+      "All four belong to Jack (median)",
+      "All four belong to Jill (ulnar)",
+      "Lateral two belong to Jill, medial two belong to Jack"
+    ],
+    correct: 0,
+    exp: "<strong>Two exceptions inside one letter of the pail.</strong> The lateral two lumbricals (index, middle) are Jack's — the one place the pail's ulnar loyalty actually splits."
+  },
+  {
+    tag: "LOAF and the crust",
+    q: "Why do the two END letters of LOAF (L and F) get \"cut off like crust\" in the mnemonic, while O and A remain?",
+    options: [
+      "L and F are not actually part of LOAF at all",
+      "O and A are harder to remember, so they need more emphasis",
+      "L and F stand for muscles that don't exist",
+      "L and F (lateral lumbricals and flexor pollicis brevis) both carry a partial ulnar nerve contribution, while O and A are 100% pure median nerve"
+    ],
+    correct: 3,
+    exp: "<strong>The crust was never fully trustworthy.</strong> Lumbricals split 2-and-2; flexor pollicis brevis's deep head often takes an ulnar contribution too. Only the soft middle is cleanly pure."
+  },
+  {
+    tag: "LOAF muscles",
+    q: "Which muscles make up LOAF?",
+    options: [
+      "All three of Jack's hill muscles plus all four lumbricals",
+      "Jack's entire hill (opponens, abductor, flexor pollicis brevis) plus the lateral two lumbricals",
+      "Jill's entire hill plus the medial two lumbricals",
+      "Only the lumbricals, all four of them"
+    ],
+    correct: 1,
+    exp: "<strong>Four muscles, median nerve.</strong> Jack's whole hill — all three — plus the lateral two lumbricals borrowed from the pail."
+  },
+  {
+    tag: "Ape hand vs claw hand",
+    q: "What is the difference between ape hand and claw hand?",
+    options: [
+      "Ape hand affects the little finger; claw hand affects the thumb",
+      "They are two names for the exact same deformity",
+      "Ape hand results from median nerve injury (thumb can't oppose, stays flat); claw hand results from ulnar nerve injury (ring/little fingers hyperextend at the MCP, flex at the IP)",
+      "Ape hand results from ulnar nerve injury; claw hand results from median nerve injury"
+    ],
+    correct: 2,
+    exp: "<strong>Two deformities, two nerves, one old nursery rhyme finally explaining both of them.</strong> Jack fell down — ape hand. Jill came tumbling after — claw hand."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let answered = new Array(questions.length).fill(false);
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('question-tag').textContent = q.tag;
+  document.getElementById('question-text').innerHTML = q.q;
+  document.getElementById('progress-label').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  const letters = ['A','B','C','D'];
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    if (answered[current]) {
+      btn.classList.add('disabled');
+      if (i === q.correct) btn.classList.add('reveal-correct');
+      if (i === answers[current] && i !== q.correct) btn.classList.add('wrong');
+      if (i === answers[current] && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+    }
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+  const exp = document.getElementById('explanation');
+  if (answered[current]) {
+    exp.style.display = 'block';
+    exp.className = 'explanation' + (answers[current] === q.correct ? '' : ' wrong-exp');
+    exp.innerHTML = q.exp;
+  } else { exp.style.display = 'none'; }
+  document.getElementById('btn-prev').disabled = current === 0;
+  const nextBtn = document.getElementById('btn-next');
+  if (current === questions.length - 1) { nextBtn.textContent = answered[current] ? 'See results →' : 'Next →'; nextBtn.disabled = !answered[current]; }
+  else { nextBtn.textContent = 'Next →'; nextBtn.disabled = !answered[current]; }
+}
+
+function selectOption(i) {
+  if (answered[current]) return;
+  answers[current] = i;
+  answered[current] = true;
+  const q = questions[current];
+  document.querySelectorAll('.option').forEach((btn, idx) => {
+    btn.classList.add('disabled');
+    if (idx === q.correct) btn.classList.add('reveal-correct');
+    if (idx === i && i !== q.correct) btn.classList.add('wrong');
+    if (idx === i && i === q.correct) { btn.classList.remove('reveal-correct'); btn.classList.add('correct'); }
+  });
+  const exp = document.getElementById('explanation');
+  exp.style.display = 'block';
+  exp.className = 'explanation' + (i === q.correct ? '' : ' wrong-exp');
+  exp.innerHTML = q.exp;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.disabled = false;
+  if (current === questions.length - 1) nextBtn.textContent = 'See results →';
+}
+
+function nextQ() {
+  if (current === questions.length - 1) { showResults(); return; }
+  current++; renderQuestion();
+}
+function prevQ() { if (current === 0) return; current--; renderQuestion(); }
+
+function showResults() {
+  document.getElementById('quiz-section').style.display = 'none';
+  document.getElementById('results-section').style.display = 'block';
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+  document.getElementById('score-label').textContent = `${pct}% correct`;
+  let msg, skull;
+  if (pct === 100) { msg = "Perfect score. Jack's hill, Jill's hill, the whole pail, the crust, and the fall — every piece of the rhyme locked in. Antony would call this a genuine value-add to the poem."; skull = "💀🏆"; }
+  else if (pct >= 75) { msg = "Strong result. Review the questions you missed, find the matching region — hill or pail — then retake. The median/ulnar split underpins how you'll read a hand injury for the rest of your career."; skull = "💀✓"; }
+  else if (pct >= 50) { msg = "Good foundation. Go back to the specific region for the muscles you missed and re-watch. Then retake immediately — nineteen muscles is genuinely manageable once Jack, Jill, and the pail click into place."; skull = "💀"; }
+  else { msg = "Re-watch the full video. Two hills, one pail, one old nursery rhyme explaining the whole hand — worth taking the time to rebuild that structure before moving on."; skull = "💀"; }
+  document.getElementById('results-skull').textContent = skull;
+  document.getElementById('score-msg').textContent = msg;
+  const rows = document.getElementById('result-rows');
+  rows.innerHTML = '';
+  questions.forEach((q, i) => {
+    const correct = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'result-row';
+    const qText = q.q.replace(/<[^>]+>/g, '');
+    const shortQ = qText.length > 80 ? qText.slice(0, 80) + '…' : qText;
+    const correctText = q.options[q.correct];
+    const shortA = correctText.length > 70 ? correctText.slice(0, 70) + '…' : correctText;
+    div.innerHTML = `<div class="result-icon">${correct ? '✓' : '✗'}</div><div><div class="result-q">${shortQ}</div><div class="result-a ${correct ? 'correct-a' : ''}">${correct ? 'Correct' : 'Correct answer: ' + shortA}</div></div>`;
+    rows.appendChild(div);
+  });
+}
+
+function restartQuiz() {
+  current = 0; answers = new Array(questions.length).fill(null); answered = new Array(questions.length).fill(false);
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('quiz-section').style.display = 'block';
+  renderQuestion();
+}
+renderQuestion();
+</script>
+</body>
+</html>
